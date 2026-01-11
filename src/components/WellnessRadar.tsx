@@ -26,11 +26,36 @@ export function WellnessRadar() {
 
       const latest = logs[0];
 
+      const stressToNumber = (stress?: string) => {
+        if (!stress) return 5;
+        if (stress === 'low') return 3;
+        if (stress === 'medium') return 5;
+        if (stress === 'high') return 8;
+        return 5;
+      };
+
+      const sleepToNumber = (sleep?: string) => {
+        if (!sleep) return 7;
+        if (sleep === '<6h') return 5;
+        if (sleep === '6-7h') return 6.5;
+        if (sleep === '7-8h') return 7.5;
+        if (sleep === '>8h') return 8.5;
+        return 7;
+      };
+
+      const bodyImageToNumber = (bodyImage?: string) => {
+        if (!bodyImage) return 5;
+        if (bodyImage === 'positive') return 8;
+        if (bodyImage === 'neutral') return 5;
+        if (bodyImage === 'negative') return 2;
+        return 5;
+      };
+
       const currentValues = [
-        10 - (latest.psych.stress || 5),
-        (latest.lifestyle.sleepHours || 7) * 1.4,
+        10 - stressToNumber(latest.psych.stress),
+        sleepToNumber(latest.lifestyle.sleep) * 1.4,
         10 - (latest.symptoms.acne || 5),
-        (latest.psych.bodyImage || 5),
+        bodyImageToNumber(latest.psych.bodyImage),
         (latest.psych.mood || 5)
       ];
 

@@ -4,6 +4,7 @@ export interface LogEntry {
   id?: number;
   date: string;
   cyclePhase: 'follicular' | 'ovulatory' | 'luteal' | 'menstrual' | 'unknown';
+  flow?: 'none' | 'spotting' | 'light' | 'medium' | 'heavy';
   symptoms: {
     acne?: number;
     hirsutism?: number;
@@ -12,18 +13,18 @@ export interface LogEntry {
     cramps?: number;
   };
   psych: {
-    stress?: number;
-    bodyImage?: number;
+    stress?: string;
+    bodyImage?: string;
     mood?: number;
-    anxiety?: number;
+    anxiety?: string;
   };
   lifestyle: {
-    sleepHours?: number;
+    sleep?: string;
     waterIntake?: number;
-    exerciseIntensity?: number;
-    dietQuality?: number;
+    exercise?: string;
+    diet?: string;
   };
-  customValues?: Record<string, number>;
+  customTags?: string[];
 }
 
 export interface CustomSymptom {

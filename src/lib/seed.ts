@@ -9,6 +9,7 @@ function generateRecoveryDay(daysAgo: number): LogEntry {
   return {
     date: format(subDays(new Date(), daysAgo), 'yyyy-MM-dd'),
     cyclePhase: 'follicular',
+    flow: 'none',
     symptoms: {
       acne: randomInRange(1, 3),
       hirsutism: randomInRange(2, 4),
@@ -17,24 +18,27 @@ function generateRecoveryDay(daysAgo: number): LogEntry {
       cramps: randomInRange(0, 2)
     },
     psych: {
-      stress: randomInRange(2, 3),
-      bodyImage: randomInRange(6, 8),
+      stress: 'low',
+      bodyImage: 'positive',
       mood: randomInRange(7, 9),
-      anxiety: randomInRange(1, 3)
+      anxiety: 'none'
     },
     lifestyle: {
-      sleepHours: randomInRange(7, 8),
+      sleep: '7-8h',
       waterIntake: randomInRange(8, 10),
-      exerciseIntensity: randomInRange(5, 7),
-      dietQuality: randomInRange(6, 8)
-    }
+      exercise: 'moderate',
+      diet: 'balanced'
+    },
+    customTags: []
   };
 }
 
 function generateCrashDay(daysAgo: number): LogEntry {
+  const flows: Array<'light' | 'medium' | 'heavy'> = ['light', 'medium', 'heavy'];
   return {
     date: format(subDays(new Date(), daysAgo), 'yyyy-MM-dd'),
     cyclePhase: 'menstrual',
+    flow: flows[Math.floor(Math.random() * flows.length)],
     symptoms: {
       acne: randomInRange(6, 8),
       hirsutism: randomInRange(5, 7),
@@ -43,27 +47,35 @@ function generateCrashDay(daysAgo: number): LogEntry {
       cramps: randomInRange(6, 9)
     },
     psych: {
-      stress: randomInRange(7, 9),
-      bodyImage: randomInRange(2, 4),
+      stress: 'high',
+      bodyImage: 'negative',
       mood: randomInRange(2, 4),
-      anxiety: randomInRange(7, 9)
+      anxiety: 'high'
     },
     lifestyle: {
-      sleepHours: randomInRange(4, 5),
+      sleep: '<6h',
       waterIntake: randomInRange(3, 5),
-      exerciseIntensity: randomInRange(1, 3),
-      dietQuality: randomInRange(2, 4)
-    }
+      exercise: 'rest',
+      diet: 'cravings'
+    },
+    customTags: []
   };
 }
 
 function generateBaselineDay(daysAgo: number): LogEntry {
   const phases: Array<'follicular' | 'ovulatory' | 'luteal'> = ['follicular', 'ovulatory', 'luteal'];
   const phase = phases[Math.floor(Math.random() * phases.length)];
+  const stressLevels: Array<'low' | 'medium' | 'high'> = ['low', 'medium', 'high'];
+  const bodyImageLevels: Array<'positive' | 'neutral' | 'negative'> = ['positive', 'neutral', 'negative'];
+  const anxietyLevels: Array<'none' | 'low' | 'high'> = ['none', 'low', 'high'];
+  const sleepOptions = ['6-7h', '7-8h'];
+  const exerciseOptions = ['light', 'moderate'];
+  const dietOptions = ['balanced', 'cravings'];
 
   return {
     date: format(subDays(new Date(), daysAgo), 'yyyy-MM-dd'),
     cyclePhase: phase,
+    flow: 'spotting',
     symptoms: {
       acne: randomInRange(3, 6),
       hirsutism: randomInRange(3, 6),
@@ -72,17 +84,18 @@ function generateBaselineDay(daysAgo: number): LogEntry {
       cramps: randomInRange(2, 6)
     },
     psych: {
-      stress: randomInRange(4, 6),
-      bodyImage: randomInRange(4, 6),
+      stress: stressLevels[Math.floor(Math.random() * stressLevels.length)],
+      bodyImage: bodyImageLevels[Math.floor(Math.random() * bodyImageLevels.length)],
       mood: randomInRange(4, 6),
-      anxiety: randomInRange(3, 6)
+      anxiety: anxietyLevels[Math.floor(Math.random() * anxietyLevels.length)]
     },
     lifestyle: {
-      sleepHours: randomInRange(6, 7),
+      sleep: sleepOptions[Math.floor(Math.random() * sleepOptions.length)],
       waterIntake: randomInRange(5, 8),
-      exerciseIntensity: randomInRange(3, 6),
-      dietQuality: randomInRange(4, 6)
-    }
+      exercise: exerciseOptions[Math.floor(Math.random() * exerciseOptions.length)],
+      diet: dietOptions[Math.floor(Math.random() * dietOptions.length)]
+    },
+    customTags: []
   };
 }
 

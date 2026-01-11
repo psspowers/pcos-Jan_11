@@ -24,15 +24,61 @@ const METRIC_PATHS: Record<string, MetricPath> = {
   hairLoss: { category: 'symptoms', field: 'hairLoss' },
   bloat: { category: 'symptoms', field: 'bloat' },
   cramps: { category: 'symptoms', field: 'cramps' },
-  sleepHours: { category: 'lifestyle', field: 'sleepHours' },
+  sleep: { category: 'lifestyle', field: 'sleep' },
   waterIntake: { category: 'lifestyle', field: 'waterIntake' },
-  exerciseIntensity: { category: 'lifestyle', field: 'exerciseIntensity' },
-  dietQuality: { category: 'lifestyle', field: 'dietQuality' }
+  exercise: { category: 'lifestyle', field: 'exercise' },
+  diet: { category: 'lifestyle', field: 'diet' }
 };
+
+function convertStringToNumber(value: string | number | undefined, field: string): number | undefined {
+  if (typeof value === 'number') return value;
+  if (value === undefined) return undefined;
+
+  if (field === 'stress') {
+    if (value === 'low') return 3;
+    if (value === 'medium') return 5;
+    if (value === 'high') return 8;
+  }
+
+  if (field === 'anxiety') {
+    if (value === 'none') return 0;
+    if (value === 'low') return 3;
+    if (value === 'high') return 8;
+  }
+
+  if (field === 'bodyImage') {
+    if (value === 'positive') return 8;
+    if (value === 'neutral') return 5;
+    if (value === 'negative') return 2;
+  }
+
+  if (field === 'sleep') {
+    if (value === '<6h') return 5;
+    if (value === '6-7h') return 6.5;
+    if (value === '7-8h') return 7.5;
+    if (value === '>8h') return 8.5;
+  }
+
+  if (field === 'exercise') {
+    if (value === 'rest') return 1;
+    if (value === 'light') return 3;
+    if (value === 'moderate') return 6;
+    if (value === 'intense') return 9;
+  }
+
+  if (field === 'diet') {
+    if (value === 'balanced') return 8;
+    if (value === 'cravings') return 4;
+    if (value === 'restrictive') return 3;
+  }
+
+  return undefined;
+}
 
 function extractMetricValue(log: LogEntry, path: MetricPath): number | undefined {
   const categoryData = log[path.category];
-  return categoryData?.[path.field as keyof typeof categoryData] as number | undefined;
+  const rawValue = categoryData?.[path.field as keyof typeof categoryData] as string | number | undefined;
+  return convertStringToNumber(rawValue, path.field);
 }
 
 function calculateAverage(values: number[]): number {
@@ -85,7 +131,7 @@ export async function getVelocity(metric: string): Promise<VelocityResult | null
 
   const percentChange = ((currentAvg - previousAvg) / previousAvg) * 100;
 
-  const isPositiveMetric = ['mood', 'bodyImage', 'sleepHours', 'waterIntake', 'dietQuality'].includes(metric);
+  const isPositiveMetric = ['mood', 'bodyImage', 'sleep', 'waterIntake', 'diet', 'exercise'].includes(metric);
 
   let direction: VelocityDirection;
   if (Math.abs(percentChange) < 5) {
