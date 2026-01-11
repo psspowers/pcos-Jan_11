@@ -32,7 +32,23 @@ ChartJS.register(
 export function Insights() {
   const [category, setCategory] = useState<InsightCategory>('hyperandrogenism');
   const [timeframe, setTimeframe] = useState<7 | 30>(7);
-  const { insights, loading } = useCategoryInsights(category, timeframe);
+  const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
+  const { insights, loading, filterByMetric, resetToComposite } = useCategoryInsights(category, timeframe);
+
+  const handleMetricClick = async (metric: string, label: string) => {
+    setSelectedMetric(metric);
+    await filterByMetric(metric, label);
+  };
+
+  const handleResetFilter = async () => {
+    setSelectedMetric(null);
+    await resetToComposite();
+  };
+
+  const handleCategoryChange = (newCategory: InsightCategory) => {
+    setCategory(newCategory);
+    setSelectedMetric(null);
+  };
 
   const categoryConfig = {
     hyperandrogenism: {
@@ -192,6 +208,17 @@ export function Insights() {
   const radarOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    onClick: (event: any, elements: any, chart: any) => {
+      const points = chart.getElementsAtEventForMode(event.native, 'nearest', { intersect: false }, false);
+      if (points.length > 0) {
+        const index = points[0].index;
+        const metric = insights.radarMetrics[index];
+        const label = insights.radarLabels[index];
+        if (metric && label) {
+          handleMetricClick(metric, label);
+        }
+      }
+    },
     plugins: {
       legend: {
         display: true,
@@ -208,7 +235,10 @@ export function Insights() {
         bodyColor: 'white',
         borderColor: 'rgba(255, 255, 255, 0.1)',
         borderWidth: 1,
-        padding: 12
+        padding: 12,
+        callbacks: {
+          footer: () => 'Click to filter factors'
+        }
       }
     },
     scales: {
@@ -218,8 +248,17 @@ export function Insights() {
         grid: { color: 'rgba(255, 255, 255, 0.1)' },
         angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
         pointLabels: {
-          color: 'rgba(255, 255, 255, 0.7)',
-          font: { size: 11 }
+          color: (context: any) => {
+            const metric = insights.radarMetrics[context.index];
+            return selectedMetric === metric ? 'rgb(45, 212, 191)' : 'rgba(255, 255, 255, 0.7)';
+          },
+          font: (context: any) => {
+            const metric = insights.radarMetrics[context.index];
+            return {
+              size: 11,
+              weight: selectedMetric === metric ? 'bold' : 'normal'
+            };
+          }
         },
         ticks: {
           color: 'rgba(255, 255, 255, 0.5)',
@@ -374,7 +413,7 @@ export function Insights() {
           return (
             <button
               key={key}
-              onClick={() => setCategory(key as InsightCategory)}
+              onClick={() => handleCategoryChange(key as InsightCategory)}
               className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
                 isActive
                   ? 'bg-white/10 text-white border border-white/20 shadow-lg'
@@ -406,7 +445,10 @@ export function Insights() {
             <h3 className="text-sm font-medium text-white/90 uppercase tracking-wide">
               Holistic Balance
             </h3>
-            <p className="text-xs text-slate-500 mt-1">Current vs Baseline comparison</p>
+            <p className="text-xs text-slate-500 mt-1">
+              Current vs Baseline comparison
+              <span className="text-teal-400 ml-1">• Click labels to filter</span>
+            </p>
           </div>
           <div className="relative" style={{ height: '280px' }}>
             <Radar data={radarData} options={radarOptions} />
@@ -445,14 +487,33 @@ export function Insights() {
 
         <div className="glass-card p-6">
           <div className="mb-4">
-            <h3 className="text-sm font-medium text-white/90 uppercase tracking-wide">
-              {insights.targetSymptomLabel ? `Factors Affecting ${insights.targetSymptomLabel}` : 'Factor Analysis'}
-            </h3>
-            <p className="text-xs text-slate-500 mt-1">
-              {insights.targetSymptomLabel
-                ? `How lifestyle choices impact ${insights.targetSymptomLabel.toLowerCase()}`
-                : 'Top factor correlations'}
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-medium text-white/90 uppercase tracking-wide">
+                  {insights.targetSymptomLabel ? `Factors Affecting ${insights.targetSymptomLabel}` : 'Factor Analysis'}
+                </h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  {selectedMetric
+                    ? `How lifestyle choices impact ${insights.targetSymptomLabel.toLowerCase()}`
+                    : `How lifestyle choices impact overall ${insights.targetSymptomLabel.toLowerCase()}`}
+                </p>
+              </div>
+              {selectedMetric && (
+                <button
+                  onClick={handleResetFilter}
+                  className="text-xs px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white rounded-lg transition-all"
+                >
+                  Show All
+                </button>
+              )}
+            </div>
+            {selectedMetric && (
+              <div className="mt-2 px-2 py-1 bg-teal-500/20 border border-teal-500/30 rounded-lg inline-block">
+                <span className="text-xs text-teal-300 font-medium">
+                  Filtered by: {insights.targetSymptomLabel}
+                </span>
+              </div>
+            )}
           </div>
           {insights.factorImpacts.length > 0 ? (
             <>

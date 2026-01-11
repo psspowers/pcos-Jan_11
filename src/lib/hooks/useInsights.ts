@@ -148,6 +148,7 @@ export interface FactorImpact {
   description: string;
   targetSymptom: string;
   targetSymptomLabel: string;
+  targetMetric?: string;
 }
 
 export interface InsightsData {
@@ -155,6 +156,7 @@ export interface InsightsData {
   radarCurrent: RadarDataset;
   radarBaseline: RadarDataset;
   radarLabels: string[];
+  radarMetrics: string[];
   spokeVelocities: SpokeVelocity[];
   factorImpacts: FactorImpact[];
   trendData: { date: string; value: number }[];
@@ -229,6 +231,7 @@ async function calculateInsights(category: InsightCategory, days: number): Promi
       radarCurrent: { label: 'Current', data: [] },
       radarBaseline: { label: 'Baseline', data: [] },
       radarLabels: [],
+      radarMetrics: [],
       spokeVelocities: [],
       factorImpacts: [],
       trendData: [],
@@ -538,6 +541,7 @@ async function calculateInsights(category: InsightCategory, days: number): Promi
     radarCurrent: { label: 'Current', data: radarCurrentData },
     radarBaseline: { label: 'Baseline', data: radarBaselineData },
     radarLabels,
+    radarMetrics,
     spokeVelocities,
     factorImpacts: factorImpacts.slice(0, 5),
     trendData,
@@ -548,12 +552,151 @@ async function calculateInsights(category: InsightCategory, days: number): Promi
   };
 }
 
+async function calculateFactorImpactsForMetric(
+  metric: string,
+  metricLabel: string,
+  currentLogs: LogEntry[],
+  days: number
+): Promise<FactorImpact[]> {
+  const metricPolarity = getMetricPolarity(metric);
+  const factorImpacts: FactorImpact[] = [];
+
+  const calculateMetricForLogs = (logs: LogEntry[]): number => {
+    const values = logs
+      .map(log => getMetricValue(log, metric))
+      .filter((v): v is number => v !== undefined);
+    return calculateAverage(values);
+  };
+
+  const goodSleepLogs = currentLogs.filter(log => {
+    const sleep = log.lifestyle.sleep;
+    return sleep === '7-8h' || sleep === '>8h';
+  });
+  const poorSleepLogs = currentLogs.filter(log => {
+    const sleep = log.lifestyle.sleep;
+    return sleep === '<6h' || sleep === '6-7h';
+  });
+
+  if (goodSleepLogs.length > 0 && poorSleepLogs.length > 0) {
+    const goodValue = calculateMetricForLogs(goodSleepLogs);
+    const poorValue = calculateMetricForLogs(poorSleepLogs);
+    const impact = poorValue === 0 ? 0 : ((poorValue - goodValue) / poorValue) * 100;
+    if (Math.abs(impact) > 5) {
+      const effectiveImpact = metricPolarity === 'direct' ? -impact : impact;
+      factorImpacts.push({
+        factor: 'Good Sleep',
+        impact: Math.round(effectiveImpact),
+        description: effectiveImpact > 0 ? `Improves ${metricLabel}` : `Worsens ${metricLabel}`,
+        targetSymptom: metric,
+        targetSymptomLabel: metricLabel,
+        targetMetric: metric
+      });
+    }
+  }
+
+  const exerciseLogs = currentLogs.filter(log => {
+    const ex = log.lifestyle.exercise;
+    return ex === 'moderate' || ex === 'intense';
+  });
+  const restLogs = currentLogs.filter(log => log.lifestyle.exercise === 'rest');
+
+  if (exerciseLogs.length > 0 && restLogs.length > 0) {
+    const exerciseValue = calculateMetricForLogs(exerciseLogs);
+    const restValue = calculateMetricForLogs(restLogs);
+    const impact = restValue === 0 ? 0 : ((restValue - exerciseValue) / restValue) * 100;
+    if (Math.abs(impact) > 5) {
+      const effectiveImpact = metricPolarity === 'direct' ? -impact : impact;
+      factorImpacts.push({
+        factor: 'Regular Exercise',
+        impact: Math.round(effectiveImpact),
+        description: effectiveImpact > 0 ? `Improves ${metricLabel}` : `Worsens ${metricLabel}`,
+        targetSymptom: metric,
+        targetSymptomLabel: metricLabel,
+        targetMetric: metric
+      });
+    }
+  }
+
+  const balancedDietLogs = currentLogs.filter(log => log.lifestyle.diet === 'balanced');
+  const cravingsDietLogs = currentLogs.filter(log => log.lifestyle.diet === 'cravings');
+
+  if (balancedDietLogs.length > 0 && cravingsDietLogs.length > 0) {
+    const balancedValue = calculateMetricForLogs(balancedDietLogs);
+    const cravingsValue = calculateMetricForLogs(cravingsDietLogs);
+    const impact = cravingsValue === 0 ? 0 : ((cravingsValue - balancedValue) / cravingsValue) * 100;
+    if (Math.abs(impact) > 5) {
+      const effectiveImpact = metricPolarity === 'direct' ? -impact : impact;
+      factorImpacts.push({
+        factor: 'Balanced Diet',
+        impact: Math.round(effectiveImpact),
+        description: effectiveImpact > 0 ? `Improves ${metricLabel}` : `Worsens ${metricLabel}`,
+        targetSymptom: metric,
+        targetSymptomLabel: metricLabel,
+        targetMetric: metric
+      });
+    }
+  }
+
+  const lowStressLogs = currentLogs.filter(log => log.psych.stress === 'low');
+  const highStressLogs = currentLogs.filter(log => {
+    const stress = log.psych.stress;
+    return stress === 'high' || stress === 'medium';
+  });
+
+  if (lowStressLogs.length > 0 && highStressLogs.length > 0) {
+    const lowValue = calculateMetricForLogs(lowStressLogs);
+    const highValue = calculateMetricForLogs(highStressLogs);
+    const impact = highValue === 0 ? 0 : ((highValue - lowValue) / highValue) * 100;
+    if (Math.abs(impact) > 5) {
+      const effectiveImpact = metricPolarity === 'direct' ? -impact : impact;
+      factorImpacts.push({
+        factor: 'Low Stress',
+        impact: Math.round(effectiveImpact),
+        description: effectiveImpact > 0 ? `Improves ${metricLabel}` : `Worsens ${metricLabel}`,
+        targetSymptom: metric,
+        targetSymptomLabel: metricLabel,
+        targetMetric: metric
+      });
+    }
+  }
+
+  const goodHydrationLogs = currentLogs.filter(log => {
+    const water = log.lifestyle.waterIntake;
+    return water !== undefined && water >= 6;
+  });
+  const poorHydrationLogs = currentLogs.filter(log => {
+    const water = log.lifestyle.waterIntake;
+    return water !== undefined && water < 6;
+  });
+
+  if (goodHydrationLogs.length > 0 && poorHydrationLogs.length > 0) {
+    const goodValue = calculateMetricForLogs(goodHydrationLogs);
+    const poorValue = calculateMetricForLogs(poorHydrationLogs);
+    const impact = poorValue === 0 ? 0 : ((poorValue - goodValue) / poorValue) * 100;
+    if (Math.abs(impact) > 5) {
+      const effectiveImpact = metricPolarity === 'direct' ? -impact : impact;
+      factorImpacts.push({
+        factor: 'Good Hydration',
+        impact: Math.round(effectiveImpact),
+        description: effectiveImpact > 0 ? `Improves ${metricLabel}` : `Worsens ${metricLabel}`,
+        targetSymptom: metric,
+        targetSymptomLabel: metricLabel,
+        targetMetric: metric
+      });
+    }
+  }
+
+  factorImpacts.sort((a, b) => Math.abs(b.impact) - Math.abs(a.impact));
+  return factorImpacts.slice(0, 5);
+}
+
 export function useCategoryInsights(category: InsightCategory, days: number) {
   const [insights, setInsights] = useState<InsightsData>({
     velocity: null,
     radarCurrent: { label: 'Current', data: [] },
     radarBaseline: { label: 'Baseline', data: [] },
     radarLabels: [],
+    radarMetrics: [],
     spokeVelocities: [],
     factorImpacts: [],
     trendData: [],
@@ -575,7 +718,30 @@ export function useCategoryInsights(category: InsightCategory, days: number) {
     loadInsights();
   }, [category, days]);
 
-  return { insights, loading };
+  const filterByMetric = async (metric: string, metricLabel: string) => {
+    const logs = await getLastNDays(days);
+    const factorImpacts = await calculateFactorImpactsForMetric(metric, metricLabel, logs, days);
+
+    const positiveFactors = factorImpacts.filter(f => f.impact > 0);
+    const fastestPositiveFactor = positiveFactors.length > 0
+      ? { factor: positiveFactors[0].factor, impact: positiveFactors[0].impact }
+      : null;
+
+    setInsights(prev => ({
+      ...prev,
+      factorImpacts,
+      targetSymptom: metric,
+      targetSymptomLabel: metricLabel,
+      fastestPositiveFactor
+    }));
+  };
+
+  const resetToComposite = async () => {
+    const data = await calculateInsights(category, days);
+    setInsights(data);
+  };
+
+  return { insights, loading, filterByMetric, resetToComposite };
 }
 
 export function useAchievements() {
