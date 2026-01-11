@@ -56,21 +56,39 @@ export function Insights() {
       icon: Activity,
       color: 'rgba(251, 113, 133, 0.8)',
       bgColor: 'rgba(251, 113, 133, 0.1)',
-      borderColor: 'rgb(251, 113, 133)'
+      borderColor: 'rgb(251, 113, 133)',
+      hex: '#fb7185',
+      glowClass: 'bg-rose-500/10',
+      shadowClass: 'shadow-[0_4px_20px_rgba(251,113,133,0.3)]',
+      borderClass: 'border-rose-500',
+      textClass: 'text-rose-400',
+      badgeBgClass: 'bg-rose-500/20 text-rose-300 border-rose-500/30'
     },
     metabolic: {
       label: 'Metabolic',
       icon: Heart,
       color: 'rgba(251, 191, 36, 0.8)',
       bgColor: 'rgba(251, 191, 36, 0.1)',
-      borderColor: 'rgb(251, 191, 36)'
+      borderColor: 'rgb(251, 191, 36)',
+      hex: '#fbbf24',
+      glowClass: 'bg-amber-500/10',
+      shadowClass: 'shadow-[0_4px_20px_rgba(251,191,36,0.3)]',
+      borderClass: 'border-amber-500',
+      textClass: 'text-amber-400',
+      badgeBgClass: 'bg-amber-500/20 text-amber-300 border-amber-500/30'
     },
     psych: {
       label: 'Emotional',
       icon: Brain,
       color: 'rgba(167, 139, 250, 0.8)',
       bgColor: 'rgba(167, 139, 250, 0.1)',
-      borderColor: 'rgb(167, 139, 250)'
+      borderColor: 'rgb(167, 139, 250)',
+      hex: '#a78bfa',
+      glowClass: 'bg-violet-500/10',
+      shadowClass: 'shadow-[0_4px_20px_rgba(167,139,250,0.3)]',
+      borderClass: 'border-violet-500',
+      textClass: 'text-violet-400',
+      badgeBgClass: 'bg-violet-500/20 text-violet-300 border-violet-500/30'
     }
   };
 
@@ -107,17 +125,17 @@ export function Insights() {
         label: 'Current Period',
         data: currentData,
         fill: true,
-        borderColor: 'rgb(45, 212, 191)',
+        borderColor: currentConfig.borderColor,
         backgroundColor: (context: any) => {
           const ctx = context.chart.ctx;
           const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-          gradient.addColorStop(0, `rgba(45, 212, 191, ${velocityIntensity})`);
+          gradient.addColorStop(0, `${currentConfig.color.replace('0.8', String(velocityIntensity))}`);
           gradient.addColorStop(1, 'rgba(15, 23, 42, 0)');
           return gradient;
         },
         tension: 0.4,
         pointRadius: 4,
-        pointBackgroundColor: 'rgb(45, 212, 191)',
+        pointBackgroundColor: currentConfig.borderColor,
         pointBorderWidth: 2,
         pointBorderColor: 'rgba(15, 23, 42, 1)',
         order: 1
@@ -182,10 +200,10 @@ export function Insights() {
       {
         label: 'Current',
         data: insights.radarCurrent.data,
-        backgroundColor: 'rgba(45, 212, 191, 0.2)',
-        borderColor: 'rgb(45, 212, 191)',
+        backgroundColor: currentConfig.bgColor,
+        borderColor: currentConfig.borderColor,
         borderWidth: 2,
-        pointBackgroundColor: 'rgb(45, 212, 191)',
+        pointBackgroundColor: currentConfig.borderColor,
         pointBorderColor: 'rgba(15, 23, 42, 1)',
         pointBorderWidth: 2,
         pointRadius: 4
@@ -250,7 +268,7 @@ export function Insights() {
         pointLabels: {
           color: (context: any) => {
             const metric = insights.radarMetrics[context.index];
-            return selectedMetric === metric ? 'rgb(45, 212, 191)' : 'rgba(255, 255, 255, 0.7)';
+            return selectedMetric === metric ? currentConfig.borderColor : 'rgba(255, 255, 255, 0.7)';
           },
           font: (context: any) => {
             const metric = insights.radarMetrics[context.index];
@@ -275,10 +293,10 @@ export function Insights() {
         label: 'Impact %',
         data: insights.factorImpacts.map(f => Math.abs(f.impact)),
         backgroundColor: insights.factorImpacts.map(f =>
-          f.impact > 0 ? 'rgba(45, 212, 191, 0.8)' : 'rgba(244, 63, 94, 0.8)'
+          f.impact > 0 ? currentConfig.color : 'rgba(244, 63, 94, 0.8)'
         ),
         borderColor: insights.factorImpacts.map(f =>
-          f.impact > 0 ? 'rgb(45, 212, 191)' : 'rgb(244, 63, 94)'
+          f.impact > 0 ? currentConfig.borderColor : 'rgb(244, 63, 94)'
         ),
         borderWidth: 1,
         borderRadius: 6
@@ -329,7 +347,7 @@ export function Insights() {
 
     const { direction, value, symptomName, percentChange, polarity } = insights.velocity;
     const colors = {
-      improving: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+      improving: currentConfig.badgeBgClass,
       worsening: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
       stable: 'bg-slate-500/20 text-slate-300 border-slate-500/30'
     };
@@ -414,9 +432,9 @@ export function Insights() {
             <button
               key={key}
               onClick={() => handleCategoryChange(key as InsightCategory)}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 ${
                 isActive
-                  ? 'bg-white/10 text-white border border-white/20 shadow-lg'
+                  ? `bg-white/10 ${config.textClass} border-b-2 ${config.borderClass} ${config.shadowClass} border-t border-x border-white/10`
                   : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-transparent'
               }`}
             >
@@ -427,7 +445,11 @@ export function Insights() {
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="relative">
+        <div
+          className={`absolute inset-0 -inset-x-12 -inset-y-12 ${currentConfig.glowClass} blur-[100px] rounded-full transition-all duration-700 pointer-events-none opacity-50`}
+        />
+        <div className="relative grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="glass-card p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-medium text-white/90 uppercase tracking-wide">
@@ -533,6 +555,7 @@ export function Insights() {
               <p className="text-slate-500 text-sm">Not enough data for correlations</p>
             </div>
           )}
+        </div>
         </div>
       </div>
     </div>
