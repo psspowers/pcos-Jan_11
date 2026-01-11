@@ -91,7 +91,7 @@ export const MentalWellnessRadar: React.FC<RadarChartProps> = ({
   });
 
   const data = {
-    labels: ['Anxiety', 'Mood Strain', 'Stress', 'Sleep', 'Body Image'],
+    labels: ['Anxiety', ['Mood', 'Strain'], 'Stress', 'Sleep', ['Body', 'Image']],
     datasets
   };
 
@@ -110,13 +110,13 @@ export const MentalWellnessRadar: React.FC<RadarChartProps> = ({
           lineWidth: 1.5
         },
         pointLabels: {
-          color: 'rgba(241, 245, 249, 0.8)',
+          color: 'rgba(241, 245, 249, 0.85)',
           font: {
             size: 13,
             family: 'Inter, system-ui, sans-serif',
             weight: '500'
           },
-          padding: 8
+          padding: 0
         },
         ticks: {
           color: 'rgba(241, 245, 249, 0.3)',
@@ -171,7 +171,7 @@ export const MentalWellnessRadar: React.FC<RadarChartProps> = ({
           <p className="text-xs text-teal-400/80 font-light">30-Day Baseline</p>
         </div>
       )}
-      <div className="w-full h-full min-h-[400px]">
+      <div className="w-full h-full min-h-[450px] -m-4">
         <Radar data={data} options={options} />
       </div>
     </div>
