@@ -10,6 +10,7 @@ export const generate30DaysOfData = async (): Promise<void> => {
     const dateString = date.toISOString().split('T')[0];
 
     const dayInCycle = 29 - i;
+    const isRecentWeek = i < 7;
 
     const isPeriod = dayInCycle >= 0 && dayInCycle <= 4;
     const isOvulation = dayInCycle >= 12 && dayInCycle <= 15;
@@ -18,23 +19,25 @@ export const generate30DaysOfData = async (): Promise<void> => {
     const sineBase = Math.sin(i / 4.5);
     const cosineBase = Math.cos(i / 5);
 
+    const recoveryFactor = isRecentWeek ? 0.6 : 1.0;
+
     const anxietyBase = 1 + Math.abs(sineBase) * 2;
-    let anxiety = anxietyBase;
-    if (isPeriod) anxiety += 1.2;
-    if (isPMS) anxiety += 1.8;
+    let anxiety = anxietyBase * recoveryFactor;
+    if (isPeriod) anxiety += 1.2 * recoveryFactor;
+    if (isPMS) anxiety += 1.8 * recoveryFactor;
     if (isOvulation) anxiety -= 0.8;
     anxiety = Math.max(0, Math.min(5, anxiety));
 
     const stressBase = 1.5 + Math.abs(cosineBase) * 1.8;
-    let stress = stressBase;
-    if (isPeriod) stress += 0.8;
-    if (isPMS) stress += 1.5;
+    let stress = stressBase * recoveryFactor;
+    if (isPeriod) stress += 0.8 * recoveryFactor;
+    if (isPMS) stress += 1.5 * recoveryFactor;
     if (isOvulation) stress -= 0.5;
     stress = Math.max(0, Math.min(5, stress));
 
-    let depression = 0.8 + Math.abs(Math.sin(i / 3.5)) * 2;
-    if (isPMS) depression += 1.5;
-    if (isPeriod) depression += 0.8;
+    let depression = (0.8 + Math.abs(Math.sin(i / 3.5)) * 2) * recoveryFactor;
+    if (isPMS) depression += 1.5 * recoveryFactor;
+    if (isPeriod) depression += 0.8 * recoveryFactor;
     if (isOvulation) depression -= 0.8;
     depression = Math.max(0, Math.min(5, depression));
 
@@ -42,12 +45,14 @@ export const generate30DaysOfData = async (): Promise<void> => {
     if (isPMS) sleepQuality -= 1.2;
     if (isPeriod) sleepQuality -= 0.6;
     if (isOvulation) sleepQuality += 0.8;
+    if (isRecentWeek) sleepQuality += 0.8;
     sleepQuality = Math.max(1, Math.min(5, sleepQuality));
 
     let bodyImage = 3 + Math.sin(i / 3) * 1;
     if (isPMS) bodyImage -= 1.5;
     if (isPeriod) bodyImage -= 0.8;
     if (isOvulation) bodyImage += 0.8;
+    if (isRecentWeek) bodyImage += 0.7;
     bodyImage = Math.max(1, Math.min(5, bodyImage));
 
     let bloating = Math.abs(Math.sin(i / 3)) * 2;

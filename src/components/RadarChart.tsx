@@ -26,6 +26,13 @@ interface RadarChartProps {
   sleepQuality: number;
   bodyImage: number;
   isMonthlyAverage?: boolean;
+  baseline?: {
+    anxiety: number;
+    depression: number;
+    stress: number;
+    sleepQuality: number;
+    bodyImage: number;
+  };
 }
 
 export const MentalWellnessRadar: React.FC<RadarChartProps> = ({
@@ -34,31 +41,57 @@ export const MentalWellnessRadar: React.FC<RadarChartProps> = ({
   stress,
   sleepQuality,
   bodyImage,
-  isMonthlyAverage = false
+  isMonthlyAverage = false,
+  baseline
 }) => {
+  const datasets = [];
+
+  if (baseline) {
+    datasets.push({
+      label: 'Last 30 Days',
+      data: [
+        baseline.anxiety,
+        baseline.depression,
+        baseline.stress,
+        5 - baseline.sleepQuality,
+        5 - baseline.bodyImage
+      ],
+      backgroundColor: 'transparent',
+      borderColor: 'rgba(255, 255, 255, 0.2)',
+      borderWidth: 2,
+      borderDash: [5, 5],
+      pointBackgroundColor: 'rgba(255, 255, 255, 0.2)',
+      pointBorderColor: 'rgba(255, 255, 255, 0.3)',
+      pointHoverBackgroundColor: 'rgba(255, 255, 255, 0.4)',
+      pointHoverBorderColor: 'rgba(255, 255, 255, 0.5)',
+      pointRadius: 3,
+      pointHoverRadius: 5
+    });
+  }
+
+  datasets.push({
+    label: baseline ? 'Last 7 Days' : (isMonthlyAverage ? 'Monthly Baseline' : 'Today'),
+    data: [
+      anxiety,
+      depression,
+      stress,
+      5 - sleepQuality,
+      5 - bodyImage
+    ],
+    backgroundColor: 'rgba(45, 212, 191, 0.2)',
+    borderColor: '#2dd4bf',
+    borderWidth: 2.5,
+    pointBackgroundColor: 'rgba(45, 212, 191, 1)',
+    pointBorderColor: '#fff',
+    pointHoverBackgroundColor: '#fff',
+    pointHoverBorderColor: 'rgba(45, 212, 191, 1)',
+    pointRadius: 4,
+    pointHoverRadius: 6
+  });
+
   const data = {
     labels: ['Anxiety', 'Mood Strain', 'Stress', 'Sleep', 'Body Image'],
-    datasets: [
-      {
-        label: isMonthlyAverage ? 'Monthly Baseline' : 'Today',
-        data: [
-          anxiety,
-          depression,
-          stress,
-          5 - sleepQuality,
-          5 - bodyImage
-        ],
-        backgroundColor: 'rgba(45, 212, 191, 0.15)',
-        borderColor: 'rgba(45, 212, 191, 0.8)',
-        borderWidth: 2.5,
-        pointBackgroundColor: 'rgba(45, 212, 191, 1)',
-        pointBorderColor: '#fff',
-        pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: 'rgba(45, 212, 191, 1)',
-        pointRadius: 4,
-        pointHoverRadius: 6
-      }
-    ]
+    datasets
   };
 
   const options: ChartOptions<'radar'> = {
@@ -125,7 +158,13 @@ export const MentalWellnessRadar: React.FC<RadarChartProps> = ({
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center p-4">
-      {isMonthlyAverage && (
+      {baseline && (
+        <div className="text-center mb-2">
+          <p className="text-xs text-white/40 font-light">Ghost: 30-Day Baseline</p>
+          <p className="text-xs text-teal-400/80 font-semibold">Current: Last 7 Days</p>
+        </div>
+      )}
+      {isMonthlyAverage && !baseline && (
         <div className="text-center mb-2">
           <p className="text-xs text-teal-400/80 font-light">30-Day Baseline</p>
         </div>

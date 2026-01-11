@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Settings, Shield, Download, Moon, Sun, Sparkles, Zap } from 'lucide-react';
+import { Plus, Settings, Shield, Download, Moon, Sun, Sparkles, Zap, TrendingDown, TrendingUp, Activity } from 'lucide-react';
 import { PlantHero } from '@/components/PlantHero';
 import { LogSheet } from '@/components/LogSheet';
 import { MentalWellnessRadar } from '@/components/RadarChart';
@@ -187,17 +187,37 @@ export const BentoDashboard: React.FC = () => {
     };
   };
 
-  const anxietyTrend = calculateTrend(recentLogs.map(l => l.psychological.anxiety));
-  const trendInsight = anxietyTrend.direction === 'down'
-    ? `Anxiety trending down ${anxietyTrend.trend}% vs last week`
-    : anxietyTrend.direction === 'up'
-    ? `Anxiety elevated ${anxietyTrend.trend}% vs last week`
-    : 'Anxiety levels holding steady';
+  const calculateSlope = (data: number[]) => {
+    if (data.length < 5) return 0;
+    const last5 = data.slice(-5);
+    const n = last5.length;
+    const xMean = (n - 1) / 2;
+    const yMean = last5.reduce((a, b) => a + b, 0) / n;
 
-  const calculateMonthlyAverage = () => {
-    if (recentLogs.length === 0) return null;
+    let numerator = 0;
+    let denominator = 0;
 
-    const sum = recentLogs.reduce((acc, log) => ({
+    for (let i = 0; i < n; i++) {
+      numerator += (i - xMean) * (last5[i] - yMean);
+      denominator += Math.pow(i - xMean, 2);
+    }
+
+    return denominator === 0 ? 0 : numerator / denominator;
+  };
+
+  const anxietyData = recentLogs.map(l => l.psychological.anxiety).reverse();
+  const anxietySlope = calculateSlope(anxietyData);
+
+  const trendInsight = anxietySlope < -0.15
+    ? 'Recovery Detected: Symptoms are decelerating'
+    : anxietySlope > 0.15
+    ? 'Trend Alert: Symptoms are intensifying'
+    : 'Status: Symptoms are holding steady';
+
+  const calculateAverage = (logs: DailyLog[]) => {
+    if (logs.length === 0) return null;
+
+    const sum = logs.reduce((acc, log) => ({
       anxiety: acc.anxiety + log.psychological.anxiety,
       depression: acc.depression + log.psychological.depression,
       stress: acc.stress + log.psychological.stress,
@@ -205,7 +225,7 @@ export const BentoDashboard: React.FC = () => {
       bodyImage: acc.bodyImage + log.psychological.bodyImage
     }), { anxiety: 0, depression: 0, stress: 0, sleepQuality: 0, bodyImage: 0 });
 
-    const count = recentLogs.length;
+    const count = logs.length;
     return {
       anxiety: Math.round((sum.anxiety / count) * 10) / 10,
       depression: Math.round((sum.depression / count) * 10) / 10,
@@ -215,8 +235,31 @@ export const BentoDashboard: React.FC = () => {
     };
   };
 
-  const monthlyAverage = calculateMonthlyAverage();
-  const showMonthlyAverage = recentLogs.length >= 7;
+  const last7Days = recentLogs.slice(0, 7);
+  const previous7Days = recentLogs.slice(7, 14);
+  const allLogs = recentLogs;
+
+  const weeklyAverage = calculateAverage(last7Days);
+  const previousWeekAverage = calculateAverage(previous7Days);
+  const monthlyAverage = calculateAverage(allLogs);
+  const showVelocity = recentLogs.length >= 14;
+
+  const calculateVelocity = (current: number, previous: number) => {
+    if (previous === 0) return { change: 0, direction: 'stable' as const };
+    const percentChange = ((current - previous) / previous) * 100;
+    return {
+      change: Math.abs(Math.round(percentChange)),
+      direction: percentChange < -5 ? 'down' : percentChange > 5 ? 'up' : 'stable' as 'down' | 'up' | 'stable'
+    };
+  };
+
+  const stressVelocity = showVelocity && weeklyAverage && previousWeekAverage
+    ? calculateVelocity(weeklyAverage.stress, previousWeekAverage.stress)
+    : null;
+
+  const anxietyVelocity = showVelocity && weeklyAverage && previousWeekAverage
+    ? calculateVelocity(weeklyAverage.anxiety, previousWeekAverage.anxiety)
+    : null;
 
   const trendOptions = {
     responsive: true,
@@ -360,9 +403,33 @@ export const BentoDashboard: React.FC = () => {
           >
             <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-purple-500/10 rounded-[2rem] blur-2xl group-hover:blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
             <div className="relative bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-2xl rounded-[2rem] border border-white/10 p-8 hover:border-white/20 transition-all shadow-xl shadow-black/20">
-              <div className="flex items-center gap-2 mb-6">
-                <div className="w-2 h-2 rounded-full bg-pink-400 animate-pulse" />
-                <h3 className="text-xs font-semibold text-white/50 uppercase tracking-[0.2em]">Cycle Phase</h3>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-pink-400 animate-pulse" />
+                  <h3 className="text-xs font-semibold text-white/50 uppercase tracking-[0.2em]">Mental State</h3>
+                </div>
+                {anxietyVelocity && (
+                  <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg backdrop-blur-sm ${
+                    anxietyVelocity.direction === 'down'
+                      ? 'bg-emerald-500/10 border border-emerald-400/30'
+                      : anxietyVelocity.direction === 'up'
+                      ? 'bg-orange-500/10 border border-orange-400/30'
+                      : 'bg-slate-500/10 border border-slate-400/30'
+                  }`}>
+                    {anxietyVelocity.direction === 'down' && <TrendingDown className="w-3.5 h-3.5 text-emerald-400" />}
+                    {anxietyVelocity.direction === 'up' && <TrendingUp className="w-3.5 h-3.5 text-orange-400" />}
+                    {anxietyVelocity.direction === 'stable' && <Activity className="w-3.5 h-3.5 text-slate-400" />}
+                    <span className={`text-xs font-semibold ${
+                      anxietyVelocity.direction === 'down'
+                        ? 'text-emerald-300'
+                        : anxietyVelocity.direction === 'up'
+                        ? 'text-orange-300'
+                        : 'text-slate-300'
+                    }`}>
+                      {anxietyVelocity.direction === 'down' ? '↓' : anxietyVelocity.direction === 'up' ? '↑' : '→'} {anxietyVelocity.change}%
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="h-52 flex items-center justify-center relative">
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -401,11 +468,44 @@ export const BentoDashboard: React.FC = () => {
           >
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-teal-500/10 rounded-[2rem] blur-2xl group-hover:blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
             <div className="relative bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-2xl rounded-[2rem] border border-white/10 p-8 hover:border-white/20 transition-all shadow-xl shadow-black/20">
-              <div className="flex items-center gap-2 mb-6">
-                <div className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
-                <h3 className="text-xs font-semibold text-white/50 uppercase tracking-[0.2em]">Wellness Balance</h3>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
+                  <h3 className="text-xs font-semibold text-white/50 uppercase tracking-[0.2em]">Wellness Balance</h3>
+                </div>
+                {stressVelocity && (
+                  <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg backdrop-blur-sm ${
+                    stressVelocity.direction === 'down'
+                      ? 'bg-emerald-500/10 border border-emerald-400/30'
+                      : stressVelocity.direction === 'up'
+                      ? 'bg-orange-500/10 border border-orange-400/30'
+                      : 'bg-slate-500/10 border border-slate-400/30'
+                  }`}>
+                    {stressVelocity.direction === 'down' && <TrendingDown className="w-3.5 h-3.5 text-emerald-400" />}
+                    {stressVelocity.direction === 'up' && <TrendingUp className="w-3.5 h-3.5 text-orange-400" />}
+                    {stressVelocity.direction === 'stable' && <Activity className="w-3.5 h-3.5 text-slate-400" />}
+                    <span className={`text-xs font-semibold ${
+                      stressVelocity.direction === 'down'
+                        ? 'text-emerald-300'
+                        : stressVelocity.direction === 'up'
+                        ? 'text-orange-300'
+                        : 'text-slate-300'
+                    }`}>
+                      {stressVelocity.direction === 'down' ? '↓' : stressVelocity.direction === 'up' ? '↑' : '→'} {stressVelocity.change}%
+                    </span>
+                  </div>
+                )}
               </div>
-              {showMonthlyAverage && monthlyAverage ? (
+              {showVelocity && weeklyAverage && monthlyAverage ? (
+                <MentalWellnessRadar
+                  anxiety={weeklyAverage.anxiety}
+                  depression={weeklyAverage.depression}
+                  stress={weeklyAverage.stress}
+                  sleepQuality={weeklyAverage.sleepQuality}
+                  bodyImage={weeklyAverage.bodyImage}
+                  baseline={monthlyAverage}
+                />
+              ) : monthlyAverage ? (
                 <MentalWellnessRadar
                   anxiety={monthlyAverage.anxiety}
                   depression={monthlyAverage.depression}
