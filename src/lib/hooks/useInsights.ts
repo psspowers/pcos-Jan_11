@@ -105,6 +105,21 @@ function getMetricPolarity(metric: string): MetricPolarity {
   return METRIC_POLARITY[metric] || 'inverse';
 }
 
+function getTargetSymptomForCategory(category: InsightCategory): { metric: string; label: string } {
+  switch (category) {
+    case 'hyperandrogenism':
+      return { metric: 'acne', label: 'Acne' };
+    case 'psych':
+      return { metric: 'anxiety', label: 'Anxiety' };
+    case 'metabolic':
+      return { metric: 'energy', label: 'Energy' };
+    case 'all':
+      return { metric: 'acne', label: 'Acne' };
+    default:
+      return { metric: 'acne', label: 'Acne' };
+  }
+}
+
 export interface VelocityInsight {
   value: number;
   direction: 'improving' | 'worsening' | 'stable';
@@ -122,6 +137,8 @@ export interface FactorImpact {
   factor: string;
   impact: number;
   description: string;
+  targetSymptom: string;
+  targetSymptomLabel: string;
 }
 
 export interface InsightsData {
@@ -132,6 +149,8 @@ export interface InsightsData {
   factorImpacts: FactorImpact[];
   trendData: { date: string; value: number }[];
   baselineTrendData: { date: string; value: number }[];
+  targetSymptom: string;
+  targetSymptomLabel: string;
 }
 
 function calculateAverage(values: number[]): number {
@@ -186,6 +205,7 @@ function convertPsychToNumber(value: string | number, field: string): number {
 
 async function calculateInsights(category: InsightCategory, days: number): Promise<InsightsData> {
   const logs = await getLastNDays(days * 2);
+  const targetSymptomInfo = getTargetSymptomForCategory(category);
 
   if (logs.length < 3) {
     return {
@@ -195,7 +215,9 @@ async function calculateInsights(category: InsightCategory, days: number): Promi
       radarLabels: [],
       factorImpacts: [],
       trendData: [],
-      baselineTrendData: []
+      baselineTrendData: [],
+      targetSymptom: targetSymptomInfo.metric,
+      targetSymptomLabel: targetSymptomInfo.label
     };
   }
 
@@ -287,6 +309,7 @@ async function calculateInsights(category: InsightCategory, days: number): Promi
   });
 
   const factorImpacts: FactorImpact[] = [];
+  const targetMetric = targetSymptomInfo.metric;
 
   const goodSleepLogs = currentLogs.filter(log => {
     const sleep = log.lifestyle.sleep;
@@ -299,17 +322,21 @@ async function calculateInsights(category: InsightCategory, days: number): Promi
 
   if (goodSleepLogs.length > 0 && poorSleepLogs.length > 0) {
     const goodSleepSymptoms = calculateAverage(
-      goodSleepLogs.map(log => getSymptomValue(log, 'acne') || 0)
+      goodSleepLogs.map(log => getMetricValue(log, targetMetric) || 0)
     );
     const poorSleepSymptoms = calculateAverage(
-      poorSleepLogs.map(log => getSymptomValue(log, 'acne') || 0)
+      poorSleepLogs.map(log => getMetricValue(log, targetMetric) || 0)
     );
     const impact = poorSleepSymptoms === 0 ? 0 : ((poorSleepSymptoms - goodSleepSymptoms) / poorSleepSymptoms) * 100;
     if (Math.abs(impact) > 5) {
+      const polarity = getMetricPolarity(targetMetric);
+      const effectiveImpact = polarity === 'direct' ? -impact : impact;
       factorImpacts.push({
-        factor: 'Good Sleep (7-8h)',
-        impact: Math.round(impact),
-        description: impact > 0 ? 'Reduces symptoms' : 'Increases symptoms'
+        factor: 'Good Sleep',
+        impact: Math.round(effectiveImpact),
+        description: effectiveImpact > 0 ? `Improves ${targetSymptomInfo.label}` : `Worsens ${targetSymptomInfo.label}`,
+        targetSymptom: targetMetric,
+        targetSymptomLabel: targetSymptomInfo.label
       });
     }
   }
@@ -322,17 +349,21 @@ async function calculateInsights(category: InsightCategory, days: number): Promi
 
   if (exerciseLogs.length > 0 && restLogs.length > 0) {
     const exerciseSymptoms = calculateAverage(
-      exerciseLogs.map(log => getSymptomValue(log, 'bloat') || 0)
+      exerciseLogs.map(log => getMetricValue(log, targetMetric) || 0)
     );
     const restSymptoms = calculateAverage(
-      restLogs.map(log => getSymptomValue(log, 'bloat') || 0)
+      restLogs.map(log => getMetricValue(log, targetMetric) || 0)
     );
     const impact = restSymptoms === 0 ? 0 : ((restSymptoms - exerciseSymptoms) / restSymptoms) * 100;
     if (Math.abs(impact) > 5) {
+      const polarity = getMetricPolarity(targetMetric);
+      const effectiveImpact = polarity === 'direct' ? -impact : impact;
       factorImpacts.push({
         factor: 'Regular Exercise',
-        impact: Math.round(impact),
-        description: impact > 0 ? 'Reduces bloating' : 'Increases bloating'
+        impact: Math.round(effectiveImpact),
+        description: effectiveImpact > 0 ? `Improves ${targetSymptomInfo.label}` : `Worsens ${targetSymptomInfo.label}`,
+        targetSymptom: targetMetric,
+        targetSymptomLabel: targetSymptomInfo.label
       });
     }
   }
@@ -342,17 +373,51 @@ async function calculateInsights(category: InsightCategory, days: number): Promi
 
   if (balancedDietLogs.length > 0 && cravingsDietLogs.length > 0) {
     const balancedSymptoms = calculateAverage(
-      balancedDietLogs.map(log => getSymptomValue(log, 'acne') || 0)
+      balancedDietLogs.map(log => getMetricValue(log, targetMetric) || 0)
     );
     const cravingsSymptoms = calculateAverage(
-      cravingsDietLogs.map(log => getSymptomValue(log, 'acne') || 0)
+      cravingsDietLogs.map(log => getMetricValue(log, targetMetric) || 0)
     );
     const impact = cravingsSymptoms === 0 ? 0 : ((cravingsSymptoms - balancedSymptoms) / cravingsSymptoms) * 100;
     if (Math.abs(impact) > 5) {
+      const polarity = getMetricPolarity(targetMetric);
+      const effectiveImpact = polarity === 'direct' ? -impact : impact;
       factorImpacts.push({
         factor: 'Balanced Diet',
-        impact: Math.round(impact),
-        description: impact > 0 ? 'Reduces acne' : 'Increases acne'
+        impact: Math.round(effectiveImpact),
+        description: effectiveImpact > 0 ? `Improves ${targetSymptomInfo.label}` : `Worsens ${targetSymptomInfo.label}`,
+        targetSymptom: targetMetric,
+        targetSymptomLabel: targetSymptomInfo.label
+      });
+    }
+  }
+
+  const lowStressLogs = currentLogs.filter(log => {
+    const stress = log.psych.stress;
+    return stress === 'low';
+  });
+  const highStressLogs = currentLogs.filter(log => {
+    const stress = log.psych.stress;
+    return stress === 'high' || stress === 'medium';
+  });
+
+  if (lowStressLogs.length > 0 && highStressLogs.length > 0) {
+    const lowStressSymptoms = calculateAverage(
+      lowStressLogs.map(log => getMetricValue(log, targetMetric) || 0)
+    );
+    const highStressSymptoms = calculateAverage(
+      highStressLogs.map(log => getMetricValue(log, targetMetric) || 0)
+    );
+    const impact = highStressSymptoms === 0 ? 0 : ((highStressSymptoms - lowStressSymptoms) / highStressSymptoms) * 100;
+    if (Math.abs(impact) > 5) {
+      const polarity = getMetricPolarity(targetMetric);
+      const effectiveImpact = polarity === 'direct' ? -impact : impact;
+      factorImpacts.push({
+        factor: 'Low Stress',
+        impact: Math.round(effectiveImpact),
+        description: effectiveImpact > 0 ? `Improves ${targetSymptomInfo.label}` : `Worsens ${targetSymptomInfo.label}`,
+        targetSymptom: targetMetric,
+        targetSymptomLabel: targetSymptomInfo.label
       });
     }
   }
@@ -376,7 +441,9 @@ async function calculateInsights(category: InsightCategory, days: number): Promi
     radarLabels,
     factorImpacts: factorImpacts.slice(0, 3),
     trendData,
-    baselineTrendData
+    baselineTrendData,
+    targetSymptom: targetSymptomInfo.metric,
+    targetSymptomLabel: targetSymptomInfo.label
   };
 }
 
@@ -388,7 +455,9 @@ export function useCategoryInsights(category: InsightCategory, days: number) {
     radarLabels: [],
     factorImpacts: [],
     trendData: [],
-    baselineTrendData: []
+    baselineTrendData: [],
+    targetSymptom: '',
+    targetSymptomLabel: ''
   });
   const [loading, setLoading] = useState(true);
 

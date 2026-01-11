@@ -219,11 +219,11 @@ export function Insights() {
   };
 
   const barData = {
-    labels: insights.factorImpacts.map(f => f.factor),
+    labels: insights.factorImpacts.map(f => `${f.factor}`),
     datasets: [
       {
         label: 'Impact %',
-        data: insights.factorImpacts.map(f => f.impact),
+        data: insights.factorImpacts.map(f => Math.abs(f.impact)),
         backgroundColor: insights.factorImpacts.map(f =>
           f.impact > 0 ? 'rgba(45, 212, 191, 0.8)' : 'rgba(244, 63, 94, 0.8)'
         ),
@@ -249,10 +249,12 @@ export function Insights() {
         borderColor: 'rgba(255, 255, 255, 0.1)',
         borderWidth: 1,
         padding: 12,
+        displayColors: false,
         callbacks: {
           label: (context: any) => {
             const impact = insights.factorImpacts[context.dataIndex];
-            return `${Math.abs(impact.impact)}% - ${impact.description}`;
+            const direction = impact.impact > 0 ? 'Improves' : 'Worsens';
+            return `${direction} ${impact.targetSymptomLabel} by ${Math.abs(impact.impact)}%`;
           }
         }
       }
@@ -405,9 +407,13 @@ export function Insights() {
         <div className="glass-card p-6">
           <div className="mb-4">
             <h3 className="text-sm font-medium text-white/90 uppercase tracking-wide">
-              What Helps
+              {insights.targetSymptomLabel ? `Factors Affecting ${insights.targetSymptomLabel}` : 'Factor Analysis'}
             </h3>
-            <p className="text-xs text-slate-500 mt-1">Top factor correlations</p>
+            <p className="text-xs text-slate-500 mt-1">
+              {insights.targetSymptomLabel
+                ? `How lifestyle choices impact ${insights.targetSymptomLabel.toLowerCase()}`
+                : 'Top factor correlations'}
+            </p>
           </div>
           {insights.factorImpacts.length > 0 ? (
             <div style={{ height: '280px' }}>
