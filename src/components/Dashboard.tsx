@@ -39,7 +39,7 @@ export function Dashboard() {
           </p>
         </header>
 
-        <BioOrb plantState={plantState} themeState={themeState} />
+        <BioOrb health={plantState.health} streak={plantState.streak} mode={themeState.mode} />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
           <div className="glass-card h-80">
