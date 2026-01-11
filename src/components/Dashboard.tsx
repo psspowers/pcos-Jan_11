@@ -3,6 +3,7 @@ import { BioOrb } from './BioOrb';
 import { WellnessRadar } from './WellnessRadar';
 import { TrendVelocity } from './TrendVelocity';
 import { CycleRing } from './CycleRing';
+import { Insights } from './Insights';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { DailyLog } from './DailyLog';
@@ -76,6 +77,8 @@ export function Dashboard() {
             <CycleRing />
           </div>
         </div>
+
+        <Insights />
       </div>
 
       <button
