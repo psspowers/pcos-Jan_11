@@ -68,10 +68,11 @@ export function Dashboard() {
 
       <button
         onClick={() => setShowDailyLog(true)}
-        className="fixed bottom-8 right-8 w-16 h-16 rounded-full bg-teal-400 hover:bg-teal-300 transition-all shadow-lg hover:shadow-xl flex items-center justify-center group hover:scale-105"
+        className="fixed bottom-8 right-8 w-16 h-16 rounded-full bg-teal-400 hover:bg-teal-300 transition-all shadow-lg hover:shadow-xl flex items-center justify-center group hover:scale-105 z-50"
         style={{
           boxShadow: '0 0 30px rgba(45, 212, 191, 0.5)'
         }}
+        aria-label="Add daily log entry"
       >
         <Plus className="w-8 h-8 text-slate-950 group-hover:rotate-90 transition-transform duration-300" />
       </button>
