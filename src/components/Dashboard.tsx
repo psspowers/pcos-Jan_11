@@ -20,6 +20,18 @@ export function Dashboard() {
     );
   }
 
+  const fabColors = {
+    nurture: 'bg-purple-400 hover:bg-purple-300',
+    steady: 'bg-teal-400 hover:bg-teal-300',
+    thrive: 'bg-amber-400 hover:bg-amber-300'
+  };
+
+  const fabGlow = {
+    nurture: '0 0 30px rgba(192, 132, 252, 0.5)',
+    steady: '0 0 30px rgba(45, 212, 191, 0.5)',
+    thrive: '0 0 30px rgba(251, 191, 36, 0.5)'
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 relative overflow-hidden">
       <div
@@ -68,13 +80,13 @@ export function Dashboard() {
 
       <button
         onClick={() => setShowDailyLog(true)}
-        className="fixed bottom-8 right-8 w-16 h-16 rounded-full bg-teal-400 hover:bg-teal-300 transition-all shadow-lg hover:shadow-xl flex items-center justify-center group hover:scale-105 z-50"
+        className={`fixed bottom-8 right-8 w-16 h-16 rounded-full ${fabColors[themeState.mode]} transition-all shadow-lg hover:shadow-xl flex items-center justify-center group hover:scale-105 z-50`}
         style={{
-          boxShadow: '0 0 30px rgba(45, 212, 191, 0.5)'
+          boxShadow: fabGlow[themeState.mode]
         }}
         aria-label="Add daily log entry"
       >
-        <Plus className="w-8 h-8 text-slate-950 group-hover:rotate-90 transition-transform duration-300" />
+        <Plus className="w-8 h-8 text-white drop-shadow-lg group-hover:rotate-90 transition-transform duration-300" />
       </button>
 
       {showDailyLog && <DailyLog onClose={() => setShowDailyLog(false)} />}
