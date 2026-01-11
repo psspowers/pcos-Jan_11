@@ -68,7 +68,21 @@ export const BentoDashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    loadData();
+    const initializeData = async () => {
+      await initializeApp();
+      const allLogs = await db.dailyLogs.toArray();
+
+      if (allLogs.length < 7) {
+        toast.loading('Generating 30 days of cycle data for stress testing...');
+        await generate30DaysOfData();
+        toast.dismiss();
+        toast.success('30 days of realistic data generated!');
+      }
+
+      await loadData();
+    };
+
+    initializeData();
   }, []);
 
   const handleLogClose = () => {
