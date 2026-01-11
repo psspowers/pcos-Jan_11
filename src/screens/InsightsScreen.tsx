@@ -6,10 +6,11 @@ import { HeatmapCalendar } from './HeatmapCalendar';
 import { AchievementsScreen } from './AchievementsScreen';
 import { CorrelationsScreen } from './CorrelationsScreen';
 import { WeeklySummary } from './WeeklySummary';
-import { Download, FileText, Calendar, Zap, Moon, AlertCircle, BarChart3, Award, Lightbulb, TrendingUp } from 'lucide-react';
+import { HyperandrogenismInsights } from './HyperandrogenismInsights';
+import { Download, FileText, Calendar, Zap, Moon, AlertCircle, BarChart3, Award, Lightbulb, TrendingUp, Activity } from 'lucide-react';
 
 export const InsightsScreen: React.FC = () => {
-  const [view, setView] = useState<'charts' | 'calendar' | 'achievements' | 'correlations' | 'weekly'>('weekly');
+  const [view, setView] = useState<'charts' | 'calendar' | 'achievements' | 'correlations' | 'weekly' | 'hyperandrogenism'>('weekly');
   const logs = getLogs().sort((a, b) => a.date.localeCompare(b.date));
 
   const handleExportCSV = () => {
@@ -60,6 +61,9 @@ export const InsightsScreen: React.FC = () => {
         <button onClick={() => { triggerHaptic('light'); setView('weekly'); }} className={`flex items-center justify-center gap-1 py-2 px-3 rounded-lg text-xs font-medium transition-all whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage-600 focus-visible:ring-offset-1 ${view === 'weekly' ? 'bg-white text-sage-800 shadow-sm' : 'text-sage-600'}`}>
           <TrendingUp className="w-4 h-4" />Weekly
         </button>
+        <button onClick={() => { triggerHaptic('light'); setView('hyperandrogenism'); }} className={`flex items-center justify-center gap-1 py-2 px-3 rounded-lg text-xs font-medium transition-all whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage-600 focus-visible:ring-offset-1 ${view === 'hyperandrogenism' ? 'bg-white text-sage-800 shadow-sm' : 'text-sage-600'}`}>
+          <Activity className="w-4 h-4" />Hyperandrogenism
+        </button>
         <button onClick={() => { triggerHaptic('light'); setView('calendar'); }} className={`flex items-center justify-center gap-1 py-2 px-3 rounded-lg text-xs font-medium transition-all whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage-600 focus-visible:ring-offset-1 ${view === 'calendar' ? 'bg-white text-sage-800 shadow-sm' : 'text-sage-600'}`}>
           <Calendar className="w-4 h-4" />Calendar
         </button>
@@ -93,6 +97,7 @@ export const InsightsScreen: React.FC = () => {
       </div>
 
       {view === 'weekly' && <WeeklySummary />}
+      {view === 'hyperandrogenism' && <HyperandrogenismInsights />}
       {view === 'calendar' && <HeatmapCalendar />}
       {view === 'achievements' && <AchievementsScreen />}
       {view === 'correlations' && <CorrelationsScreen />}

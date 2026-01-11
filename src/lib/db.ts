@@ -25,10 +25,18 @@ export interface DailyLog {
     sleepQuality: number;
   };
 
+  lifestyle?: {
+    waterIntake: number;
+    exerciseMinutes: number;
+    sleepHours: number;
+  };
+
   customMetrics?: Array<{
     name: string;
     value: number;
   }>;
+
+  customValues?: Record<string, number>;
 }
 
 export interface PlantState {
