@@ -204,21 +204,22 @@ export function Insights() {
         borderColor: currentConfig.borderColor,
         borderWidth: 2,
         pointBackgroundColor: currentConfig.borderColor,
-        pointBorderColor: 'rgba(15, 23, 42, 1)',
+        pointBorderColor: '#fff',
         pointBorderWidth: 2,
-        pointRadius: 4
+        pointRadius: 5,
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: currentConfig.borderColor
       },
       {
         label: 'Baseline (Ghost)',
         data: insights.radarBaseline.data,
         backgroundColor: 'rgba(255, 255, 255, 0.05)',
-        borderColor: 'rgba(255, 255, 255, 0.5)',
-        borderWidth: 2,
-        borderDash: [3, 3],
-        pointBackgroundColor: 'rgba(255, 255, 255, 0.5)',
-        pointBorderColor: 'rgba(15, 23, 42, 1)',
-        pointBorderWidth: 1,
-        pointRadius: 3
+        borderColor: 'rgba(255, 255, 255, 0.3)',
+        borderWidth: 1,
+        borderDash: [5, 5],
+        pointBackgroundColor: 'rgba(255, 255, 255, 0.3)',
+        pointBorderColor: 'rgba(255, 255, 255, 0.3)',
+        pointRadius: 2
       }
     ]
   };
@@ -273,14 +274,15 @@ export function Insights() {
           font: (context: any) => {
             const metric = insights.radarMetrics[context.index];
             return {
-              size: 11,
-              weight: selectedMetric === metric ? 'bold' : 'normal'
+              size: 13,
+              weight: selectedMetric === metric ? 'bold' : 'normal',
+              family: 'Inter, system-ui, sans-serif'
             };
           }
         },
         ticks: {
-          color: 'rgba(255, 255, 255, 0.5)',
-          backdropColor: 'transparent'
+          display: false,
+          stepSize: 2
         }
       }
     }
@@ -457,7 +459,7 @@ export function Insights() {
             </h3>
             <VelocityBadge />
           </div>
-          <div style={{ height: '220px' }}>
+          <div style={{ height: '300px' }}>
             <Line data={lineData} options={lineOptions} />
           </div>
         </div>
@@ -472,7 +474,7 @@ export function Insights() {
               <span className="text-teal-400 ml-1">• Click labels to filter</span>
             </p>
           </div>
-          <div className="relative" style={{ height: '220px' }}>
+          <div className="relative" style={{ height: '300px' }}>
             <Radar data={radarData} options={radarOptions} />
             {insights.spokeVelocities.map((spoke, index) => {
               if (spoke.direction === 'stable') return null;
@@ -539,7 +541,7 @@ export function Insights() {
           </div>
           {insights.factorImpacts.length > 0 ? (
             <>
-              <div style={{ height: '180px' }}>
+              <div style={{ height: '260px' }}>
                 <Bar data={barData} options={barOptions} />
               </div>
               {insights.fastestPositiveFactor && (
@@ -551,7 +553,7 @@ export function Insights() {
               )}
             </>
           ) : (
-            <div className="flex items-center justify-center h-[220px]">
+            <div className="flex items-center justify-center h-[300px]">
               <p className="text-slate-500 text-sm">Not enough data for correlations</p>
             </div>
           )}
