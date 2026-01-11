@@ -57,15 +57,15 @@ export const MentalWellnessRadar: React.FC<RadarChartProps> = ({
         5 - baseline.bodyImage
       ],
       backgroundColor: 'transparent',
-      borderColor: 'rgba(255, 255, 255, 0.2)',
-      borderWidth: 2,
+      borderColor: 'rgba(255, 255, 255, 0.3)',
+      borderWidth: 2.5,
       borderDash: [5, 5],
-      pointBackgroundColor: 'rgba(255, 255, 255, 0.2)',
-      pointBorderColor: 'rgba(255, 255, 255, 0.3)',
-      pointHoverBackgroundColor: 'rgba(255, 255, 255, 0.4)',
-      pointHoverBorderColor: 'rgba(255, 255, 255, 0.5)',
-      pointRadius: 3,
-      pointHoverRadius: 5
+      pointBackgroundColor: 'rgba(255, 255, 255, 0.3)',
+      pointBorderColor: 'rgba(255, 255, 255, 0.5)',
+      pointHoverBackgroundColor: 'rgba(255, 255, 255, 0.6)',
+      pointHoverBorderColor: 'rgba(255, 255, 255, 0.8)',
+      pointRadius: 5,
+      pointHoverRadius: 7
     });
   }
 
@@ -78,15 +78,16 @@ export const MentalWellnessRadar: React.FC<RadarChartProps> = ({
       5 - sleepQuality,
       5 - bodyImage
     ],
-    backgroundColor: 'rgba(45, 212, 191, 0.2)',
-    borderColor: '#2dd4bf',
-    borderWidth: 2.5,
+    backgroundColor: 'rgba(45, 212, 191, 0.25)',
+    borderColor: 'rgba(45, 212, 191, 1)',
+    borderWidth: 3,
     pointBackgroundColor: 'rgba(45, 212, 191, 1)',
     pointBorderColor: '#fff',
+    pointBorderWidth: 2,
     pointHoverBackgroundColor: '#fff',
     pointHoverBorderColor: 'rgba(45, 212, 191, 1)',
-    pointRadius: 4,
-    pointHoverRadius: 6
+    pointRadius: 6,
+    pointHoverRadius: 8
   });
 
   const data = {
@@ -96,25 +97,26 @@ export const MentalWellnessRadar: React.FC<RadarChartProps> = ({
 
   const options: ChartOptions<'radar'> = {
     responsive: true,
-    maintainAspectRatio: true,
+    maintainAspectRatio: false,
     scales: {
       r: {
         angleLines: {
-          color: 'rgba(148, 163, 184, 0.1)',
-          lineWidth: 1
+          color: 'rgba(148, 163, 184, 0.35)',
+          lineWidth: 1.5
         },
         grid: {
-          color: 'rgba(148, 163, 184, 0.1)',
+          color: 'rgba(148, 163, 184, 0.4)',
           circular: true,
-          lineWidth: 1
+          lineWidth: 1.5
         },
         pointLabels: {
-          color: 'rgba(241, 245, 249, 0.6)',
+          color: 'rgba(241, 245, 249, 0.8)',
           font: {
-            size: 11,
+            size: 13,
             family: 'Inter, system-ui, sans-serif',
-            weight: '400'
-          }
+            weight: '500'
+          },
+          padding: 8
         },
         ticks: {
           color: 'rgba(241, 245, 249, 0.3)',
@@ -157,19 +159,21 @@ export const MentalWellnessRadar: React.FC<RadarChartProps> = ({
   };
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center p-4">
+    <div className="w-full h-full flex flex-col items-center justify-center relative">
       {baseline && (
-        <div className="text-center mb-2">
+        <div className="absolute top-4 left-0 right-0 text-center z-10 pointer-events-none">
           <p className="text-xs text-white/40 font-light">Ghost: 30-Day Baseline</p>
           <p className="text-xs text-teal-400/80 font-semibold">Current: Last 7 Days</p>
         </div>
       )}
       {isMonthlyAverage && !baseline && (
-        <div className="text-center mb-2">
+        <div className="absolute top-4 left-0 right-0 text-center z-10 pointer-events-none">
           <p className="text-xs text-teal-400/80 font-light">30-Day Baseline</p>
         </div>
       )}
-      <Radar data={data} options={options} />
+      <div className="w-full h-full min-h-[400px]">
+        <Radar data={data} options={options} />
+      </div>
     </div>
   );
 };

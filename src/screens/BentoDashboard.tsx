@@ -489,8 +489,8 @@ export const BentoDashboard: React.FC = () => {
             className="group relative"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-teal-500/10 rounded-[2rem] blur-2xl group-hover:blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
-            <div className="relative bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-2xl rounded-[2rem] border border-white/10 p-8 hover:border-white/20 transition-all shadow-xl shadow-black/20 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.15)]">
-              <div className="flex items-center justify-between mb-6">
+            <div className="relative bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-2xl rounded-[2rem] border border-white/10 p-4 hover:border-white/20 transition-all shadow-xl shadow-black/20 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.15)] h-full flex flex-col">
+              <div className="flex items-center justify-between mb-3 px-2">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
                   <h3 className="text-xs font-semibold text-white/50 uppercase tracking-[0.2em]">Wellness Balance</h3>
@@ -518,6 +518,7 @@ export const BentoDashboard: React.FC = () => {
                   </div>
                 )}
               </div>
+              <div className="flex-1 min-h-[480px]">
               {showVelocity && weeklyAverage && monthlyAverage ? (
                 <MentalWellnessRadar
                   anxiety={weeklyAverage.anxiety}
@@ -545,11 +546,12 @@ export const BentoDashboard: React.FC = () => {
                   bodyImage={todayLog.psychological.bodyImage}
                 />
               ) : (
-                <div className="h-52 flex flex-col items-center justify-center text-white/30 text-sm gap-3">
+                <div className="h-full flex flex-col items-center justify-center text-white/30 text-sm gap-3">
                   <Sparkles className="w-8 h-8 text-white/20" />
                   <p>Log today to see your snapshot</p>
                 </div>
               )}
+              </div>
             </div>
           </motion.div>
         </div>
