@@ -4,7 +4,9 @@ import { WellnessRadar } from './WellnessRadar';
 import { TrendVelocity } from './TrendVelocity';
 import { CycleRing } from './CycleRing';
 import { Insights } from './Insights';
-import { Plus } from 'lucide-react';
+import { DailyWisdom } from './DailyWisdom';
+import { SettingsModal } from './SettingsModal';
+import { Plus, Settings } from 'lucide-react';
 import { useState } from 'react';
 import { DailyLog } from './DailyLog';
 
@@ -12,6 +14,7 @@ export function Dashboard() {
   const { plantState, loading: plantLoading } = usePlantState();
   const { themeState, loading: themeLoading } = useInterfaceMode();
   const [showDailyLog, setShowDailyLog] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   if (plantLoading || themeLoading) {
     return (
@@ -43,18 +46,27 @@ export function Dashboard() {
       />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-8">
-        <header className="mb-8">
-          <h1 className="text-2xl font-bold text-white tracking-tight">
-            Blossom
-          </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Your PCOS wellness companion
-          </p>
+        <header className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-white tracking-tight">
+              Blossom
+            </h1>
+            <p className="text-sm text-slate-400 mt-1">
+              Your PCOS wellness companion
+            </p>
+          </div>
+          <button
+            onClick={() => setShowSettings(true)}
+            className="p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all group"
+            aria-label="Open settings"
+          >
+            <Settings className="w-5 h-5 text-slate-400 group-hover:text-white group-hover:rotate-90 transition-all duration-300" />
+          </button>
         </header>
 
         <BioOrb health={plantState.health} streak={plantState.streak} mode={themeState.mode} />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
           <div className="glass-card h-80">
             <div className="p-4 border-b border-white/10">
               <h2 className="text-sm font-medium text-white/90 uppercase tracking-wide">
@@ -76,6 +88,8 @@ export function Dashboard() {
             </div>
             <CycleRing />
           </div>
+
+          <DailyWisdom />
         </div>
 
         <Insights />
@@ -93,6 +107,7 @@ export function Dashboard() {
       </button>
 
       {showDailyLog && <DailyLog onClose={() => setShowDailyLog(false)} />}
+      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
     </div>
   );
 }
