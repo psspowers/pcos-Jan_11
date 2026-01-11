@@ -2,8 +2,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { db, DailyLog } from '@/lib/db';
 import { Card } from '@/ui/card';
 import { Badge } from '@/ui/badge';
-import { TrendingDown, TrendingUp, Minus, Info } from 'lucide-react';
+import { Button } from '@/ui/button';
+import { TrendingDown, TrendingUp, Minus, Info, Sparkles } from 'lucide-react';
 import { calculateVelocity, calculateFactorImpact, getFactorLabel, FactorImpact } from '@/lib/velocityAnalysis';
+import { generateSampleHyperandrogenismData } from '@/lib/sampleDataGenerator';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -34,14 +36,28 @@ ChartJS.register(
 
 export const HyperandrogenismInsights: React.FC = () => {
   const [logs, setLogs] = useState<DailyLog[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const loadData = async () => {
+    const allLogs = await db.dailyLogs.orderBy('date').reverse().toArray();
+    setLogs(allLogs);
+  };
 
   useEffect(() => {
-    const loadData = async () => {
-      const allLogs = await db.dailyLogs.orderBy('date').reverse().toArray();
-      setLogs(allLogs);
-    };
     loadData();
   }, []);
+
+  const handleGenerateSampleData = async () => {
+    setIsGenerating(true);
+    try {
+      await generateSampleHyperandrogenismData(60);
+      await loadData();
+    } catch (error) {
+      console.error('Error generating sample data:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const { current30, past30 } = useMemo(() => {
     const current30 = logs.slice(0, 30).reverse();
@@ -297,10 +313,21 @@ export const HyperandrogenismInsights: React.FC = () => {
   if (logs.length < 7) {
     return (
       <Card className="border-slate-700/50 bg-gradient-to-br from-slate-900/40 via-slate-800/30 to-slate-900/40 backdrop-blur-xl">
-        <div className="p-8 text-center">
+        <div className="p-8 text-center space-y-4">
           <Info className="w-12 h-12 text-slate-500 mx-auto mb-3" />
           <h3 className="text-lg font-semibold text-slate-300 mb-2">Not Enough Data</h3>
           <p className="text-slate-400 text-sm">Log at least 7 days to see hyperandrogenism insights</p>
+          <div className="pt-4">
+            <Button
+              onClick={handleGenerateSampleData}
+              disabled={isGenerating}
+              className="bg-teal-500 hover:bg-teal-600 text-white"
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              {isGenerating ? 'Generating...' : 'Generate Sample Data (60 days)'}
+            </Button>
+            <p className="text-slate-500 text-xs mt-2">Demo data to preview the insights</p>
+          </div>
         </div>
       </Card>
     );
