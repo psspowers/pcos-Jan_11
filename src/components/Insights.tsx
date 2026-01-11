@@ -60,26 +60,53 @@ export function Insights() {
 
   const currentConfig = categoryConfig[category as keyof typeof categoryConfig];
 
+  const maxDataPoints = Math.max(insights.trendData.length, insights.baselineTrendData.length);
+  const trendLabels = insights.trendData.map((d, i) => {
+    if (insights.trendData.length <= 10) {
+      return new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+    return `Day ${i + 1}`;
+  });
+
+  const currentData = insights.trendData.map(d => d.value);
+  const baselineData = insights.baselineTrendData.map(d => d.value);
+
+  const paddedBaselineData = [...Array(maxDataPoints - baselineData.length).fill(null), ...baselineData];
+
   const lineData = {
-    labels: insights.trendData.map(d => new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+    labels: trendLabels,
     datasets: [
       {
-        label: 'Symptom Trend',
-        data: insights.trendData.map(d => d.value),
+        label: 'Current Period',
+        data: currentData,
         fill: true,
-        borderColor: currentConfig?.borderColor || 'rgb(45, 212, 191)',
+        borderColor: 'rgb(45, 212, 191)',
         backgroundColor: (context: any) => {
           const ctx = context.chart.ctx;
           const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-          gradient.addColorStop(0, currentConfig?.color || 'rgba(45, 212, 191, 0.4)');
+          gradient.addColorStop(0, 'rgba(45, 212, 191, 0.4)');
           gradient.addColorStop(1, 'rgba(15, 23, 42, 0)');
           return gradient;
         },
         tension: 0.4,
         pointRadius: 4,
-        pointBackgroundColor: currentConfig?.borderColor || 'rgb(45, 212, 191)',
+        pointBackgroundColor: 'rgb(45, 212, 191)',
         pointBorderWidth: 2,
-        pointBorderColor: 'rgba(15, 23, 42, 1)'
+        pointBorderColor: 'rgba(15, 23, 42, 1)',
+        order: 1
+      },
+      {
+        label: 'Previous Period',
+        data: paddedBaselineData,
+        fill: false,
+        borderColor: 'rgb(148, 163, 184)',
+        borderDash: [5, 5],
+        tension: 0.4,
+        pointRadius: 3,
+        pointBackgroundColor: 'rgb(148, 163, 184)',
+        pointBorderWidth: 1,
+        pointBorderColor: 'rgba(15, 23, 42, 1)',
+        order: 2
       }
     ]
   };
@@ -88,7 +115,17 @@ export function Insights() {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { display: false },
+      legend: {
+        display: true,
+        position: 'top' as const,
+        labels: {
+          color: 'rgba(255, 255, 255, 0.7)',
+          padding: 12,
+          font: { size: 11 },
+          usePointStyle: true,
+          pointStyle: 'circle'
+        }
+      },
       tooltip: {
         backgroundColor: 'rgba(15, 23, 42, 0.95)',
         titleColor: 'white',
@@ -96,7 +133,7 @@ export function Insights() {
         borderColor: 'rgba(255, 255, 255, 0.1)',
         borderWidth: 1,
         padding: 12,
-        displayColors: false
+        displayColors: true
       }
     },
     scales: {
@@ -118,24 +155,24 @@ export function Insights() {
       {
         label: 'Current',
         data: insights.radarCurrent.data,
-        backgroundColor: currentConfig?.color || 'rgba(45, 212, 191, 0.2)',
-        borderColor: currentConfig?.borderColor || 'rgb(45, 212, 191)',
+        backgroundColor: 'rgba(45, 212, 191, 0.2)',
+        borderColor: 'rgb(45, 212, 191)',
         borderWidth: 2,
-        pointBackgroundColor: currentConfig?.borderColor || 'rgb(45, 212, 191)',
+        pointBackgroundColor: 'rgb(45, 212, 191)',
         pointBorderColor: 'rgba(15, 23, 42, 1)',
         pointBorderWidth: 2,
         pointRadius: 4
       },
       {
-        label: 'Baseline',
+        label: 'Baseline (Ghost)',
         data: insights.radarBaseline.data,
         backgroundColor: 'rgba(255, 255, 255, 0.05)',
-        borderColor: 'rgba(255, 255, 255, 0.3)',
+        borderColor: 'rgba(255, 255, 255, 0.5)',
         borderWidth: 2,
-        borderDash: [5, 5],
-        pointBackgroundColor: 'rgba(255, 255, 255, 0.3)',
+        borderDash: [3, 3],
+        pointBackgroundColor: 'rgba(255, 255, 255, 0.5)',
         pointBorderColor: 'rgba(15, 23, 42, 1)',
-        pointBorderWidth: 2,
+        pointBorderWidth: 1,
         pointRadius: 3
       }
     ]
@@ -188,10 +225,10 @@ export function Insights() {
         label: 'Impact %',
         data: insights.factorImpacts.map(f => f.impact),
         backgroundColor: insights.factorImpacts.map(f =>
-          f.impact > 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'
+          f.impact > 0 ? 'rgba(45, 212, 191, 0.8)' : 'rgba(244, 63, 94, 0.8)'
         ),
         borderColor: insights.factorImpacts.map(f =>
-          f.impact > 0 ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)'
+          f.impact > 0 ? 'rgb(45, 212, 191)' : 'rgb(244, 63, 94)'
         ),
         borderWidth: 1,
         borderRadius: 6

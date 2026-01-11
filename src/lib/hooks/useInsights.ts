@@ -107,6 +107,7 @@ export interface InsightsData {
   radarLabels: string[];
   factorImpacts: FactorImpact[];
   trendData: { date: string; value: number }[];
+  baselineTrendData: { date: string; value: number }[];
 }
 
 function calculateAverage(values: number[]): number {
@@ -169,7 +170,8 @@ async function calculateInsights(category: InsightCategory, days: number): Promi
       radarBaseline: { label: 'Baseline', data: [] },
       radarLabels: [],
       factorImpacts: [],
-      trendData: []
+      trendData: [],
+      baselineTrendData: []
     };
   }
 
@@ -336,13 +338,19 @@ async function calculateInsights(category: InsightCategory, days: number): Promi
     value: getMetricValue(log, mainMetric) || 0
   }));
 
+  const baselineTrendData = baselineLogs.map(log => ({
+    date: log.date,
+    value: getMetricValue(log, mainMetric) || 0
+  }));
+
   return {
     velocity,
     radarCurrent: { label: 'Current', data: radarCurrentData },
     radarBaseline: { label: 'Baseline', data: radarBaselineData },
     radarLabels,
     factorImpacts: factorImpacts.slice(0, 3),
-    trendData
+    trendData,
+    baselineTrendData
   };
 }
 
@@ -353,7 +361,8 @@ export function useCategoryInsights(category: InsightCategory, days: number) {
     radarBaseline: { label: 'Baseline', data: [] },
     radarLabels: [],
     factorImpacts: [],
-    trendData: []
+    trendData: [],
+    baselineTrendData: []
   });
   const [loading, setLoading] = useState(true);
 
