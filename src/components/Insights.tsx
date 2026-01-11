@@ -356,7 +356,7 @@ export function Insights() {
 
   if (loading) {
     return (
-      <div className="mt-12 glass-card p-8">
+      <div className="mt-6 glass-card p-6">
         <div className="flex items-center justify-center">
           <div className="text-slate-400 animate-pulse">Loading insights...</div>
         </div>
@@ -368,7 +368,7 @@ export function Insights() {
 
   if (!hasData) {
     return (
-      <div className="mt-12 glass-card p-8">
+      <div className="mt-6 glass-card p-6">
         <div className="text-center">
           <h3 className="text-lg font-semibold text-white mb-2">No Data Yet</h3>
           <p className="text-slate-400 text-sm">
@@ -380,8 +380,8 @@ export function Insights() {
   }
 
   return (
-    <div className="mt-12">
-      <div className="flex items-center justify-between mb-6">
+    <div className="mt-6">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-xl font-bold text-white">Insights Engine</h2>
           <p className="text-sm text-slate-400 mt-1">Evidence-based pattern analysis</p>
@@ -406,7 +406,7 @@ export function Insights() {
         </div>
       </div>
 
-      <div className="flex gap-3 mb-6">
+      <div className="flex gap-3 mb-4">
         {Object.entries(categoryConfig).map(([key, config]) => {
           const Icon = config.icon;
           const isActive = category === key;
@@ -414,7 +414,7 @@ export function Insights() {
             <button
               key={key}
               onClick={() => handleCategoryChange(key as InsightCategory)}
-              className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
                 isActive
                   ? 'bg-white/10 text-white border border-white/20 shadow-lg'
                   : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-transparent'
@@ -427,21 +427,21 @@ export function Insights() {
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="glass-card p-6">
-          <div className="flex items-center justify-between mb-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="glass-card p-4">
+          <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-medium text-white/90 uppercase tracking-wide">
               Velocity Trend
             </h3>
             <VelocityBadge />
           </div>
-          <div style={{ height: '280px' }}>
+          <div style={{ height: '220px' }}>
             <Line data={lineData} options={lineOptions} />
           </div>
         </div>
 
-        <div className="glass-card p-6">
-          <div className="mb-4">
+        <div className="glass-card p-4">
+          <div className="mb-3">
             <h3 className="text-sm font-medium text-white/90 uppercase tracking-wide">
               Holistic Balance
             </h3>
@@ -450,7 +450,7 @@ export function Insights() {
               <span className="text-teal-400 ml-1">• Click labels to filter</span>
             </p>
           </div>
-          <div className="relative" style={{ height: '280px' }}>
+          <div className="relative" style={{ height: '220px' }}>
             <Radar data={radarData} options={radarOptions} />
             {insights.spokeVelocities.map((spoke, index) => {
               if (spoke.direction === 'stable') return null;
@@ -485,8 +485,8 @@ export function Insights() {
           </div>
         </div>
 
-        <div className="glass-card p-6">
-          <div className="mb-4">
+        <div className="glass-card p-4">
+          <div className="mb-3">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-medium text-white/90 uppercase tracking-wide">
@@ -501,7 +501,7 @@ export function Insights() {
               {selectedMetric && (
                 <button
                   onClick={handleResetFilter}
-                  className="text-xs px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white rounded-lg transition-all"
+                  className="text-xs px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white rounded-lg transition-all"
                 >
                   Show All
                 </button>
@@ -517,11 +517,11 @@ export function Insights() {
           </div>
           {insights.factorImpacts.length > 0 ? (
             <>
-              <div style={{ height: '240px' }}>
+              <div style={{ height: '180px' }}>
                 <Bar data={barData} options={barOptions} />
               </div>
               {insights.fastestPositiveFactor && (
-                <div className="mt-4 pt-4 border-t border-white/10">
+                <div className="mt-3 pt-3 border-t border-white/10">
                   <p className="text-xs text-teal-400 font-medium">
                     Fastest positive shift: <span className="text-white">{insights.fastestPositiveFactor.factor}</span> linked to <span className="text-teal-300">{insights.fastestPositiveFactor.impact}%</span> improvement
                   </p>
@@ -529,7 +529,7 @@ export function Insights() {
               )}
             </>
           ) : (
-            <div className="flex items-center justify-center h-[280px]">
+            <div className="flex items-center justify-center h-[220px]">
               <p className="text-slate-500 text-sm">Not enough data for correlations</p>
             </div>
           )}
