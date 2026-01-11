@@ -76,6 +76,12 @@ a:focus-visible,
   }
 }
 
+@layer components {
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl;
+  }
+}
+
 @keyframes float {
   0%, 100% {
     transform: translateY(0px) translateX(0px);
