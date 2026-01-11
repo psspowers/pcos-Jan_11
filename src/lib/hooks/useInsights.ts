@@ -83,10 +83,34 @@ export function useVelocities() {
 
 export type InsightCategory = 'hyperandrogenism' | 'metabolic' | 'psych' | 'all';
 
+type MetricPolarity = 'direct' | 'inverse';
+
+const METRIC_POLARITY: Record<string, MetricPolarity> = {
+  sleep: 'direct',
+  exercise: 'direct',
+  diet: 'direct',
+  waterIntake: 'direct',
+  mood: 'direct',
+  bodyImage: 'direct',
+  acne: 'inverse',
+  hirsutism: 'inverse',
+  hairLoss: 'inverse',
+  bloat: 'inverse',
+  cramps: 'inverse',
+  stress: 'inverse',
+  anxiety: 'inverse'
+};
+
+function getMetricPolarity(metric: string): MetricPolarity {
+  return METRIC_POLARITY[metric] || 'inverse';
+}
+
 export interface VelocityInsight {
   value: number;
   direction: 'improving' | 'worsening' | 'stable';
   symptomName: string;
+  percentChange: number;
+  polarity: MetricPolarity;
 }
 
 export interface RadarDataset {
@@ -229,12 +253,12 @@ async function calculateInsights(category: InsightCategory, days: number): Promi
   const currentAvg = calculateAverage(currentValues);
 
   const percentChange = baselineAvg === 0 ? 0 : ((currentAvg - baselineAvg) / baselineAvg) * 100;
-  const isPositiveMetric = ['sleep', 'exercise', 'diet', 'mood', 'bodyImage', 'waterIntake'].includes(mainMetric);
+  const polarity = getMetricPolarity(mainMetric);
 
   let direction: 'improving' | 'worsening' | 'stable';
   if (Math.abs(percentChange) < 5) {
     direction = 'stable';
-  } else if (isPositiveMetric) {
+  } else if (polarity === 'direct') {
     direction = percentChange > 0 ? 'improving' : 'worsening';
   } else {
     direction = percentChange < 0 ? 'improving' : 'worsening';
@@ -243,7 +267,9 @@ async function calculateInsights(category: InsightCategory, days: number): Promi
   const velocity: VelocityInsight = {
     value: Math.abs(Math.round(percentChange)),
     direction,
-    symptomName: radarLabels[0]
+    symptomName: radarLabels[0],
+    percentChange: Math.round(percentChange),
+    polarity
   };
 
   const radarCurrentData = radarMetrics.map(metric => {

@@ -275,21 +275,31 @@ export function Insights() {
   const VelocityBadge = () => {
     if (!insights.velocity) return null;
 
-    const { direction, value, symptomName } = insights.velocity;
+    const { direction, value, symptomName, percentChange, polarity } = insights.velocity;
     const colors = {
       improving: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
       worsening: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
       stable: 'bg-slate-500/20 text-slate-300 border-slate-500/30'
     };
 
-    const Icon = direction === 'improving' ? TrendingDown : direction === 'worsening' ? TrendingUp : Minus;
+    const isIncreasing = percentChange > 0;
+    const Icon = direction === 'improving' ? TrendingUp : direction === 'worsening' ? TrendingDown : Minus;
+    const arrow = isIncreasing ? '↑' : percentChange < 0 ? '↓' : '—';
+
+    let displayText = '';
+    if (direction === 'stable') {
+      displayText = `${symptomName} Stable`;
+    } else {
+      const changeVerb = polarity === 'direct'
+        ? (isIncreasing ? 'Increasing' : 'Decreasing')
+        : (isIncreasing ? 'Worsening' : 'Improving');
+      displayText = `${symptomName} ${changeVerb} ${arrow}${value}%`;
+    }
 
     return (
       <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border ${colors[direction]}`}>
         <Icon className="w-4 h-4" />
-        <span className="text-sm font-medium">
-          {symptomName} {direction === 'stable' ? 'Stable' : `${direction} ${value}%`}
-        </span>
+        <span className="text-sm font-medium">{displayText}</span>
       </div>
     );
   };
