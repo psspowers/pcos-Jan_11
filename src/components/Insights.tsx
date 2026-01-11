@@ -73,6 +73,17 @@ export function Insights() {
 
   const paddedBaselineData = [...Array(maxDataPoints - baselineData.length).fill(null), ...baselineData];
 
+  const calculateVelocityIntensity = () => {
+    if (!insights.velocity || insights.velocity.direction === 'stable') return 0.3;
+    const absChange = Math.abs(insights.velocity.percentChange);
+    if (absChange < 10) return 0.3;
+    if (absChange < 20) return 0.45;
+    if (absChange < 30) return 0.6;
+    return 0.75;
+  };
+
+  const velocityIntensity = calculateVelocityIntensity();
+
   const lineData = {
     labels: trendLabels,
     datasets: [
@@ -84,7 +95,7 @@ export function Insights() {
         backgroundColor: (context: any) => {
           const ctx = context.chart.ctx;
           const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-          gradient.addColorStop(0, 'rgba(45, 212, 191, 0.4)');
+          gradient.addColorStop(0, `rgba(45, 212, 191, ${velocityIntensity})`);
           gradient.addColorStop(1, 'rgba(15, 23, 42, 0)');
           return gradient;
         },
@@ -397,8 +408,38 @@ export function Insights() {
             </h3>
             <p className="text-xs text-slate-500 mt-1">Current vs Baseline comparison</p>
           </div>
-          <div style={{ height: '280px' }}>
+          <div className="relative" style={{ height: '280px' }}>
             <Radar data={radarData} options={radarOptions} />
+            {insights.spokeVelocities.map((spoke, index) => {
+              if (spoke.direction === 'stable') return null;
+              const totalSpokes = insights.spokeVelocities.length;
+              const angle = (index * 360) / totalSpokes - 90;
+              const radians = (angle * Math.PI) / 180;
+              const radius = spoke.direction === 'improving' ? 85 : 115;
+              const x = 50 + radius * Math.cos(radians) * 0.85;
+              const y = 50 + radius * Math.sin(radians) * 0.85;
+              return (
+                <div
+                  key={index}
+                  className="absolute"
+                  style={{
+                    left: `${x}%`,
+                    top: `${y}%`,
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                >
+                  {spoke.direction === 'improving' ? (
+                    <div className="w-5 h-5 rounded-full bg-emerald-500/30 border border-emerald-400 flex items-center justify-center">
+                      <span className="text-emerald-300 text-xs">↓</span>
+                    </div>
+                  ) : (
+                    <div className="w-5 h-5 rounded-full bg-rose-500/30 border border-rose-400 flex items-center justify-center">
+                      <span className="text-rose-300 text-xs">↑</span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -414,9 +455,18 @@ export function Insights() {
             </p>
           </div>
           {insights.factorImpacts.length > 0 ? (
-            <div style={{ height: '280px' }}>
-              <Bar data={barData} options={barOptions} />
-            </div>
+            <>
+              <div style={{ height: '240px' }}>
+                <Bar data={barData} options={barOptions} />
+              </div>
+              {insights.fastestPositiveFactor && (
+                <div className="mt-4 pt-4 border-t border-white/10">
+                  <p className="text-xs text-teal-400 font-medium">
+                    Fastest positive shift: <span className="text-white">{insights.fastestPositiveFactor.factor}</span> linked to <span className="text-teal-300">{insights.fastestPositiveFactor.impact}%</span> improvement
+                  </p>
+                </div>
+              )}
+            </>
           ) : (
             <div className="flex items-center justify-center h-[280px]">
               <p className="text-slate-500 text-sm">Not enough data for correlations</p>
