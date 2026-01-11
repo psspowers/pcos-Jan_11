@@ -187,30 +187,42 @@ export const BentoDashboard: React.FC = () => {
     };
   };
 
-  const calculateSlope = (data: number[]) => {
-    if (data.length < 5) return 0;
-    const last5 = data.slice(-5);
-    const n = last5.length;
+  const calculateSlope = (data: number[], windowSize: number = 5) => {
+    if (data.length < windowSize) return 0;
+    const window = data.slice(-windowSize);
+    const n = window.length;
     const xMean = (n - 1) / 2;
-    const yMean = last5.reduce((a, b) => a + b, 0) / n;
+    const yMean = window.reduce((a, b) => a + b, 0) / n;
 
     let numerator = 0;
     let denominator = 0;
 
     for (let i = 0; i < n; i++) {
-      numerator += (i - xMean) * (last5[i] - yMean);
+      numerator += (i - xMean) * (window[i] - yMean);
       denominator += Math.pow(i - xMean, 2);
     }
 
     return denominator === 0 ? 0 : numerator / denominator;
   };
 
-  const anxietyData = recentLogs.map(l => l.psychological.anxiety).reverse();
-  const anxietySlope = calculateSlope(anxietyData);
+  const calculateRecentChange = (data: number[], windowSize: number = 3) => {
+    if (data.length < windowSize) return 0;
+    const window = data.slice(-windowSize);
+    const first = window[0];
+    const last = window[window.length - 1];
+    if (first === 0) return 0;
+    return ((last - first) / first) * 100;
+  };
 
-  const trendInsight = anxietySlope < -0.15
+  const anxietyData = recentLogs.map(l => l.psychological.anxiety).reverse();
+  const recentChange = calculateRecentChange(anxietyData, 3);
+  const overallSlope = calculateSlope(anxietyData, 5);
+
+  const trendInsight = recentChange > 10
+    ? 'Alert: Recent symptom spike detected'
+    : overallSlope < -0.15
     ? 'Recovery Detected: Symptoms are decelerating'
-    : anxietySlope > 0.15
+    : overallSlope > 0.15
     ? 'Trend Alert: Symptoms are intensifying'
     : 'Status: Symptoms are holding steady';
 
@@ -247,9 +259,15 @@ export const BentoDashboard: React.FC = () => {
   const calculateVelocity = (current: number, previous: number) => {
     if (previous === 0) return { change: 0, direction: 'stable' as const };
     const percentChange = ((current - previous) / previous) * 100;
+    const absChange = Math.abs(percentChange);
+
+    if (absChange < 2) {
+      return { change: Math.round(absChange), direction: 'stable' as const };
+    }
+
     return {
-      change: Math.abs(Math.round(percentChange)),
-      direction: percentChange < -5 ? 'down' : percentChange > 5 ? 'up' : 'stable' as 'down' | 'up' | 'stable'
+      change: Math.round(absChange),
+      direction: percentChange < 0 ? 'down' : 'up' as 'down' | 'up' | 'stable'
     };
   };
 
