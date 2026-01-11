@@ -159,7 +159,12 @@ function calculateAverage(values: number[]): number {
 }
 
 function getSymptomValue(log: LogEntry, field: string): number | undefined {
-  return log.symptoms[field as keyof typeof log.symptoms];
+  const symptomValue = log.symptoms[field as keyof typeof log.symptoms];
+  if (symptomValue !== undefined) return symptomValue;
+  if (log.customValues && log.customValues[field] !== undefined) {
+    return log.customValues[field];
+  }
+  return undefined;
 }
 
 function convertLifestyleToNumber(value: string, field: string): number {
@@ -260,6 +265,9 @@ async function calculateInsights(category: InsightCategory, days: number): Promi
     if (['mood', 'stress', 'anxiety', 'bodyImage'].includes(metric)) {
       const val = log.psych[metric as keyof typeof log.psych];
       if (val !== undefined) return convertPsychToNumber(val, metric);
+    }
+    if (log.customValues && log.customValues[metric] !== undefined) {
+      return log.customValues[metric];
     }
     return undefined;
   };

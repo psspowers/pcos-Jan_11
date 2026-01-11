@@ -24,7 +24,7 @@ export interface LogEntry {
     exercise?: string;
     diet?: string;
   };
-  customTags?: string[];
+  customValues?: Record<string, number>;
 }
 
 export interface CustomSymptom {
