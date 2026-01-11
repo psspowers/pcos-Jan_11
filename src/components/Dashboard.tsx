@@ -1,8 +1,7 @@
 import { usePlantState, useInterfaceMode } from '../lib/hooks/useInsights';
 import { BioOrb } from './BioOrb';
 import { WellnessRadar } from './WellnessRadar';
-import { TrendVelocity } from './TrendVelocity';
-import { CycleRing } from './CycleRing';
+import { CycleContext } from './CycleContext';
 import { Insights } from './Insights';
 import { DailyWisdom } from './DailyWisdom';
 import { SettingsModal } from './SettingsModal';
@@ -66,7 +65,16 @@ export function Dashboard() {
 
         <BioOrb health={plantState.health} streak={plantState.streak} mode={themeState.mode} />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+          <div className="glass-card h-80">
+            <div className="p-4 border-b border-white/10">
+              <h2 className="text-sm font-medium text-white/90 uppercase tracking-wide">
+                Cycle Context
+              </h2>
+            </div>
+            <CycleContext />
+          </div>
+
           <div className="glass-card h-80">
             <div className="p-4 border-b border-white/10">
               <h2 className="text-sm font-medium text-white/90 uppercase tracking-wide">
@@ -74,19 +82,6 @@ export function Dashboard() {
               </h2>
             </div>
             <WellnessRadar />
-          </div>
-
-          <div className="glass-card h-80">
-            <TrendVelocity />
-          </div>
-
-          <div className="glass-card h-80">
-            <div className="p-4 border-b border-white/10">
-              <h2 className="text-sm font-medium text-white/90 uppercase tracking-wide">
-                Cycle Status
-              </h2>
-            </div>
-            <CycleRing />
           </div>
 
           <DailyWisdom />
