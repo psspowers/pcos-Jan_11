@@ -93,9 +93,11 @@ export const BentoDashboard: React.FC = () => {
           recentLogs.filter(l => l.cycleFlow !== 'none').length,
           recentLogs.filter(l => l.cycleFlow === 'none').length
         ],
-        backgroundColor: ['rgba(236, 72, 153, 0.7)', 'rgba(148, 163, 184, 0.4)'],
-        borderColor: ['rgba(236, 72, 153, 1)', 'rgba(148, 163, 184, 0.6)'],
-        borderWidth: 3
+        backgroundColor: ['rgba(236, 72, 153, 0.1)', 'rgba(148, 163, 184, 0.05)'],
+        borderColor: ['rgba(236, 72, 153, 1)', 'rgba(148, 163, 184, 0.4)'],
+        borderWidth: 4,
+        cutout: '80%',
+        spacing: 2
       }
     ]
   };
@@ -252,7 +254,13 @@ export const BentoDashboard: React.FC = () => {
                 <div className="w-2 h-2 rounded-full bg-pink-400 animate-pulse" />
                 <h3 className="text-xs font-semibold text-white/50 uppercase tracking-[0.2em]">Cycle Phase</h3>
               </div>
-              <div className="h-52 flex items-center justify-center">
+              <div className="h-52 flex items-center justify-center relative">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-4xl font-light text-white/90">{recentLogs.filter(l => l.cycleFlow !== 'none').length}</div>
+                    <div className="text-xs text-white/40 mt-1">period days</div>
+                  </div>
+                </div>
                 <Doughnut
                   data={cycleData}
                   options={{
@@ -271,12 +279,6 @@ export const BentoDashboard: React.FC = () => {
                     }
                   }}
                 />
-              </div>
-              <div className="mt-6 text-center">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10">
-                  <span className="text-2xl font-semibold text-white/90">{recentLogs.filter(l => l.cycleFlow !== 'none').length}</span>
-                  <span className="text-sm text-white/50">period days this week</span>
-                </div>
               </div>
             </div>
           </motion.div>
