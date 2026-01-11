@@ -108,23 +108,63 @@ export const BentoDashboard: React.FC = () => {
       {
         label: 'Anxiety',
         data: recentLogs.map(l => l.psychological.anxiety).reverse(),
-        borderColor: 'rgba(239, 68, 68, 1)',
-        backgroundColor: 'rgba(239, 68, 68, 0.15)',
+        borderColor: 'rgba(45, 212, 191, 1)',
+        backgroundColor: (context: any) => {
+          const ctx = context.chart.ctx;
+          const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+          gradient.addColorStop(0, 'rgba(45, 212, 191, 0.3)');
+          gradient.addColorStop(1, 'rgba(45, 212, 191, 0.01)');
+          return gradient;
+        },
         fill: true,
         tension: 0.4,
-        borderWidth: 2
+        borderWidth: 2.5,
+        pointRadius: 0,
+        pointHoverRadius: 6,
+        pointBackgroundColor: 'rgba(45, 212, 191, 1)',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2
       },
       {
         label: 'Stress',
         data: recentLogs.map(l => l.psychological.stress).reverse(),
-        borderColor: 'rgba(251, 191, 36, 1)',
-        backgroundColor: 'rgba(251, 191, 36, 0.15)',
+        borderColor: 'rgba(168, 85, 247, 1)',
+        backgroundColor: (context: any) => {
+          const ctx = context.chart.ctx;
+          const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+          gradient.addColorStop(0, 'rgba(168, 85, 247, 0.3)');
+          gradient.addColorStop(1, 'rgba(168, 85, 247, 0.01)');
+          return gradient;
+        },
         fill: true,
         tension: 0.4,
-        borderWidth: 2
+        borderWidth: 2.5,
+        pointRadius: 0,
+        pointHoverRadius: 6,
+        pointBackgroundColor: 'rgba(168, 85, 247, 1)',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2
       }
     ]
   };
+
+  const calculateTrend = (data: number[]) => {
+    if (data.length < 2) return { trend: 0, direction: 'stable' };
+    const recent = data.slice(-3).reduce((a, b) => a + b, 0) / 3;
+    const previous = data.slice(0, -3).reduce((a, b) => a + b, 0) / Math.max(1, data.length - 3);
+    const change = ((recent - previous) / Math.max(1, previous)) * 100;
+    return {
+      trend: Math.abs(Math.round(change)),
+      direction: change < -5 ? 'down' : change > 5 ? 'up' : 'stable'
+    };
+  };
+
+  const anxietyTrend = calculateTrend(recentLogs.map(l => l.psychological.anxiety));
+  const trendInsight = anxietyTrend.direction === 'down'
+    ? `Anxiety trending down ${anxietyTrend.trend}% vs last week`
+    : anxietyTrend.direction === 'up'
+    ? `Anxiety elevated ${anxietyTrend.trend}% vs last week`
+    : 'Anxiety levels holding steady';
 
   const trendOptions = {
     responsive: true,
@@ -134,38 +174,40 @@ export const BentoDashboard: React.FC = () => {
         beginAtZero: true,
         max: 5,
         grid: {
-          color: 'rgba(148, 163, 184, 0.08)'
+          display: false
+        },
+        border: {
+          display: false
         },
         ticks: {
-          color: 'rgba(241, 245, 249, 0.5)',
+          color: 'rgba(241, 245, 249, 0.4)',
           font: {
-            size: 11
-          }
+            size: 11,
+            weight: '300'
+          },
+          padding: 10
         }
       },
       x: {
         grid: {
-          color: 'rgba(148, 163, 184, 0.08)'
+          display: false
+        },
+        border: {
+          display: false
         },
         ticks: {
-          color: 'rgba(241, 245, 249, 0.5)',
+          color: 'rgba(241, 245, 249, 0.4)',
           font: {
-            size: 11
-          }
+            size: 11,
+            weight: '300'
+          },
+          padding: 10
         }
       }
     },
     plugins: {
       legend: {
-        display: true,
-        labels: {
-          color: 'rgba(241, 245, 249, 0.8)',
-          font: {
-            size: 12,
-            weight: '400'
-          },
-          padding: 15
-        }
+        display: false
       },
       tooltip: {
         backgroundColor: 'rgba(15, 23, 42, 0.95)',
@@ -174,7 +216,11 @@ export const BentoDashboard: React.FC = () => {
         borderColor: 'rgba(148, 163, 184, 0.3)',
         borderWidth: 1,
         padding: 12,
-        cornerRadius: 8
+        cornerRadius: 8,
+        displayColors: true,
+        boxWidth: 8,
+        boxHeight: 8,
+        usePointStyle: true
       }
     }
   };
@@ -292,8 +338,8 @@ export const BentoDashboard: React.FC = () => {
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-teal-500/10 rounded-[2rem] blur-2xl group-hover:blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
             <div className="relative bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-2xl rounded-[2rem] border border-white/10 p-8 hover:border-white/20 transition-all shadow-xl shadow-black/20">
               <div className="flex items-center gap-2 mb-6">
-                <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-                <h3 className="text-xs font-semibold text-white/50 uppercase tracking-[0.2em]">Mental State</h3>
+                <div className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
+                <h3 className="text-xs font-semibold text-white/50 uppercase tracking-[0.2em]">Wellness Balance</h3>
               </div>
               {todayLog ? (
                 <MentalWellnessRadar
@@ -319,13 +365,32 @@ export const BentoDashboard: React.FC = () => {
           transition={{ delay: 0.3 }}
           className="group relative"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-red-500/10 rounded-[2rem] blur-2xl group-hover:blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
-          <div className="relative bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-2xl rounded-[2rem] border border-white/10 p-8 hover:border-white/20 transition-all shadow-xl shadow-black/20">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-              <h3 className="text-xs font-semibold text-white/50 uppercase tracking-[0.2em]">7-Day Trend</h3>
+          <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 to-purple-500/10 rounded-[2rem] blur-2xl group-hover:blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
+          <div className="relative bg-gradient-to-br from-slate-900/40 to-slate-950/60 backdrop-blur-2xl rounded-[2rem] border border-white/10 p-8 hover:border-white/20 transition-all shadow-xl shadow-black/20">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
+                <h3 className="text-xs font-semibold text-white/50 uppercase tracking-[0.2em]">Wellness Trend</h3>
+              </div>
+              <div className="flex gap-3">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-teal-400" />
+                  <span className="text-xs text-white/50">Anxiety</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-purple-400" />
+                  <span className="text-xs text-white/50">Stress</span>
+                </div>
+              </div>
             </div>
-            <div className="h-72">
+            {recentLogs.length > 0 && (
+              <div className="mb-4 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
+                <p className="text-sm text-white/70 font-light">
+                  {trendInsight}
+                </p>
+              </div>
+            )}
+            <div className="h-64">
               <Line data={trendData} options={trendOptions} />
             </div>
           </div>
