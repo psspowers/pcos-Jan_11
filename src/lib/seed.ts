@@ -115,23 +115,40 @@ export async function seedDatabase(): Promise<void> {
 
   const syntheticData: LogEntry[] = [];
 
-  for (let daysAgo = 1; daysAgo <= 7; daysAgo++) {
-    syntheticData.push(generateRecoveryDay(daysAgo));
-  }
+  const pattern = [
+    { type: 'recovery', label: 'Good Day' },
+    { type: 'recovery', label: 'Good Day' },
+    { type: 'baseline', label: 'Mixed Day' },
+    { type: 'crash', label: 'Bad Day' },
+    { type: 'recovery', label: 'Good Day' },
+    { type: 'baseline', label: 'Mixed Day' },
+    { type: 'crash', label: 'Bad Day' },
+    { type: 'crash', label: 'Bad Day' },
+    { type: 'recovery', label: 'Good Day' },
+    { type: 'baseline', label: 'Mixed Day' },
+    { type: 'recovery', label: 'Good Day' },
+    { type: 'crash', label: 'Bad Day' },
+    { type: 'baseline', label: 'Mixed Day' },
+    { type: 'recovery', label: 'Good Day' },
+  ];
 
-  for (let daysAgo = 8; daysAgo <= 14; daysAgo++) {
-    syntheticData.push(generateCrashDay(daysAgo));
-  }
+  for (let daysAgo = 1; daysAgo <= 30; daysAgo++) {
+    const patternIndex = (daysAgo - 1) % pattern.length;
+    const dayType = pattern[patternIndex].type;
 
-  for (let daysAgo = 15; daysAgo <= 30; daysAgo++) {
-    syntheticData.push(generateBaselineDay(daysAgo));
+    if (dayType === 'recovery') {
+      syntheticData.push(generateRecoveryDay(daysAgo));
+    } else if (dayType === 'crash') {
+      syntheticData.push(generateCrashDay(daysAgo));
+    } else {
+      syntheticData.push(generateBaselineDay(daysAgo));
+    }
   }
 
   await db.logs.bulkAdd(syntheticData);
 
   console.log(`✅ Seeded ${syntheticData.length} days of synthetic data`);
   console.log('📊 Data Narrative:');
-  console.log('  Days 1-7: Recovery (Low stress, High sleep)');
-  console.log('  Days 8-14: The Crash (High stress, Low sleep)');
-  console.log('  Days 15-30: Baseline (Mixed data)');
+  console.log('  Mixed pattern with recovery, crash, and baseline days');
+  console.log('  Enables meaningful lifestyle factor correlations');
 }
