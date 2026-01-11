@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/ui/theme-provider";
-import { BentoDashboard } from "@/screens/BentoDashboard";
+import Index from "@/screens/Index";
 import NotFound from "@/screens/NotFound";
 import { motion } from "framer-motion";
 
@@ -46,7 +46,7 @@ const App = () => (
           <Sonner position="top-center" />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<BentoDashboard />} />
+              <Route path="/" element={<Index />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
