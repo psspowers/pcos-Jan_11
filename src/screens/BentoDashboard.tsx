@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Settings, Shield, Download, Moon, Sun, Sparkles } from 'lucide-react';
+import { Plus, Settings, Shield, Download, Moon, Sun, Sparkles, Zap } from 'lucide-react';
 import { PlantHero } from '@/components/PlantHero';
 import { LogSheet } from '@/components/LogSheet';
 import { MentalWellnessRadar } from '@/components/RadarChart';
 import { db, initializeApp, PlantState, DailyLog, exportAllData, deleteAllData } from '@/lib/db';
+import { generate30DaysOfData } from '@/lib/dataGenerator';
 import { Doughnut, Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -46,11 +47,24 @@ export const BentoDashboard: React.FC = () => {
     await initializeApp();
     const plant = await db.plantState.get('primary');
     const log = await db.dailyLogs.get(today);
-    const logs = await db.dailyLogs.orderBy('date').reverse().limit(7).toArray();
+    const logs = await db.dailyLogs.orderBy('date').reverse().limit(30).toArray();
 
     setPlantState(plant || null);
     setTodayLog(log || null);
     setRecentLogs(logs);
+  };
+
+  const handleGenerateData = async () => {
+    try {
+      toast.loading('Generating 30 days of realistic cycle data...');
+      await generate30DaysOfData();
+      await loadData();
+      toast.dismiss();
+      toast.success('30 days of realistic cycle data generated!');
+    } catch (error) {
+      toast.dismiss();
+      toast.error('Failed to generate data');
+    }
   };
 
   useEffect(() => {
@@ -166,6 +180,30 @@ export const BentoDashboard: React.FC = () => {
     ? `Anxiety elevated ${anxietyTrend.trend}% vs last week`
     : 'Anxiety levels holding steady';
 
+  const calculateMonthlyAverage = () => {
+    if (recentLogs.length === 0) return null;
+
+    const sum = recentLogs.reduce((acc, log) => ({
+      anxiety: acc.anxiety + log.psychological.anxiety,
+      depression: acc.depression + log.psychological.depression,
+      stress: acc.stress + log.psychological.stress,
+      sleepQuality: acc.sleepQuality + log.psychological.sleepQuality,
+      bodyImage: acc.bodyImage + log.psychological.bodyImage
+    }), { anxiety: 0, depression: 0, stress: 0, sleepQuality: 0, bodyImage: 0 });
+
+    const count = recentLogs.length;
+    return {
+      anxiety: Math.round((sum.anxiety / count) * 10) / 10,
+      depression: Math.round((sum.depression / count) * 10) / 10,
+      stress: Math.round((sum.stress / count) * 10) / 10,
+      sleepQuality: Math.round((sum.sleepQuality / count) * 10) / 10,
+      bodyImage: Math.round((sum.bodyImage / count) * 10) / 10
+    };
+  };
+
+  const monthlyAverage = calculateMonthlyAverage();
+  const showMonthlyAverage = recentLogs.length >= 7;
+
   const trendOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -201,7 +239,12 @@ export const BentoDashboard: React.FC = () => {
             size: 11,
             weight: '300'
           },
-          padding: 10
+          padding: 10,
+          maxRotation: 0,
+          minRotation: 0,
+          callback: function(value: any, index: number) {
+            return index % 5 === 0 ? this.getLabelForValue(value) : '';
+          }
         }
       }
     },
@@ -262,6 +305,13 @@ export const BentoDashboard: React.FC = () => {
             >
               {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               {darkMode ? 'Light Mode' : 'Dark Mode'}
+            </button>
+            <button
+              onClick={handleGenerateData}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-br from-teal-500/10 to-cyan-500/5 hover:from-teal-500/20 hover:to-cyan-500/10 text-teal-300 text-sm flex items-center gap-2 border border-teal-400/30 backdrop-blur-xl transition-all hover:scale-105 active:scale-95"
+            >
+              <Zap className="w-4 h-4" />
+              Generate 30-Day Data
             </button>
             <button
               onClick={handleExport}
@@ -341,7 +391,16 @@ export const BentoDashboard: React.FC = () => {
                 <div className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
                 <h3 className="text-xs font-semibold text-white/50 uppercase tracking-[0.2em]">Wellness Balance</h3>
               </div>
-              {todayLog ? (
+              {showMonthlyAverage && monthlyAverage ? (
+                <MentalWellnessRadar
+                  anxiety={monthlyAverage.anxiety}
+                  depression={monthlyAverage.depression}
+                  stress={monthlyAverage.stress}
+                  sleepQuality={monthlyAverage.sleepQuality}
+                  bodyImage={monthlyAverage.bodyImage}
+                  isMonthlyAverage={true}
+                />
+              ) : todayLog ? (
                 <MentalWellnessRadar
                   anxiety={todayLog.psychological.anxiety}
                   depression={todayLog.psychological.depression}

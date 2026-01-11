@@ -25,6 +25,7 @@ interface RadarChartProps {
   stress: number;
   sleepQuality: number;
   bodyImage: number;
+  isMonthlyAverage?: boolean;
 }
 
 export const MentalWellnessRadar: React.FC<RadarChartProps> = ({
@@ -32,13 +33,14 @@ export const MentalWellnessRadar: React.FC<RadarChartProps> = ({
   depression,
   stress,
   sleepQuality,
-  bodyImage
+  bodyImage,
+  isMonthlyAverage = false
 }) => {
   const data = {
     labels: ['Anxiety', 'Mood Strain', 'Stress', 'Sleep', 'Body Image'],
     datasets: [
       {
-        label: 'Today',
+        label: isMonthlyAverage ? 'Monthly Baseline' : 'Today',
         data: [
           anxiety,
           depression,
@@ -122,7 +124,12 @@ export const MentalWellnessRadar: React.FC<RadarChartProps> = ({
   };
 
   return (
-    <div className="w-full h-full flex items-center justify-center p-4">
+    <div className="w-full h-full flex flex-col items-center justify-center p-4">
+      {isMonthlyAverage && (
+        <div className="text-center mb-2">
+          <p className="text-xs text-teal-400/80 font-light">30-Day Baseline</p>
+        </div>
+      )}
       <Radar data={data} options={options} />
     </div>
   );
