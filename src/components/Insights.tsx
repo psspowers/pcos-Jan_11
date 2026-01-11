@@ -290,12 +290,10 @@ export function Insights() {
 
     let displayText = '';
     if (direction === 'stable') {
-      displayText = `${symptomName} Stable`;
+      displayText = `${symptomName} — Stable`;
     } else {
-      const changeVerb = polarity === 'direct'
-        ? (isIncreasing ? 'Increasing' : 'Decreasing')
-        : (isIncreasing ? 'Worsening' : 'Improving');
-      displayText = `${symptomName} ${changeVerb} ${arrow}${value}%`;
+      const sign = percentChange > 0 ? '+' : '';
+      displayText = `${symptomName} ${arrow} ${sign}${Math.abs(percentChange)}%`;
     }
 
     return (

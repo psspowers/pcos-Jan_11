@@ -160,11 +160,11 @@ export function TrendVelocity() {
     if (!velocity) return 'Gathering insights...';
     const absChange = Math.abs(velocity.percentChange);
     if (velocity.direction === 'improving') {
-      return `Anxiety Decelerating ↓${absChange}%`;
+      return `Anxiety ↓ ${absChange}%`;
     } else if (velocity.direction === 'worsening') {
-      return `Anxiety Accelerating ↑${absChange}%`;
+      return `Anxiety ↑ ${absChange}%`;
     }
-    return 'Anxiety Stable';
+    return 'Anxiety — Stable';
   };
 
   if (!chartData) {
