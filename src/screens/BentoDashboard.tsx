@@ -140,18 +140,20 @@ export const BentoDashboard: React.FC = () => {
         backgroundColor: (context: any) => {
           const ctx = context.chart.ctx;
           const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-          gradient.addColorStop(0, 'rgba(45, 212, 191, 0.3)');
-          gradient.addColorStop(1, 'rgba(45, 212, 191, 0.01)');
+          gradient.addColorStop(0, 'rgba(45, 212, 191, 0.6)');
+          gradient.addColorStop(0.5, 'rgba(168, 85, 247, 0.4)');
+          gradient.addColorStop(1, 'rgba(168, 85, 247, 0)');
           return gradient;
         },
         fill: true,
         tension: 0.4,
         borderWidth: 2.5,
         pointRadius: 0,
-        pointHoverRadius: 6,
+        pointHoverRadius: 8,
         pointBackgroundColor: 'rgba(45, 212, 191, 1)',
         pointBorderColor: '#fff',
-        pointBorderWidth: 2
+        pointBorderWidth: 2.5,
+        pointHoverBorderWidth: 3
       },
       {
         label: 'Stress',
@@ -160,18 +162,20 @@ export const BentoDashboard: React.FC = () => {
         backgroundColor: (context: any) => {
           const ctx = context.chart.ctx;
           const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-          gradient.addColorStop(0, 'rgba(168, 85, 247, 0.3)');
-          gradient.addColorStop(1, 'rgba(168, 85, 247, 0.01)');
+          gradient.addColorStop(0, 'rgba(168, 85, 247, 0.6)');
+          gradient.addColorStop(0.5, 'rgba(45, 212, 191, 0.4)');
+          gradient.addColorStop(1, 'rgba(45, 212, 191, 0)');
           return gradient;
         },
         fill: true,
         tension: 0.4,
         borderWidth: 2.5,
         pointRadius: 0,
-        pointHoverRadius: 6,
+        pointHoverRadius: 8,
         pointBackgroundColor: 'rgba(168, 85, 247, 1)',
         pointBorderColor: '#fff',
-        pointBorderWidth: 2
+        pointBorderWidth: 2.5,
+        pointHoverBorderWidth: 3
       }
     ]
   };
@@ -420,7 +424,7 @@ export const BentoDashboard: React.FC = () => {
             className="group relative"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-purple-500/10 rounded-[2rem] blur-2xl group-hover:blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
-            <div className="relative bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-2xl rounded-[2rem] border border-white/10 p-8 hover:border-white/20 transition-all shadow-xl shadow-black/20">
+            <div className="relative bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-2xl rounded-[2rem] border border-white/10 p-8 hover:border-white/20 transition-all shadow-xl shadow-black/20 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.15)]">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-pink-400 animate-pulse" />
@@ -485,7 +489,7 @@ export const BentoDashboard: React.FC = () => {
             className="group relative"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-teal-500/10 rounded-[2rem] blur-2xl group-hover:blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
-            <div className="relative bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-2xl rounded-[2rem] border border-white/10 p-8 hover:border-white/20 transition-all shadow-xl shadow-black/20">
+            <div className="relative bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-2xl rounded-[2rem] border border-white/10 p-8 hover:border-white/20 transition-all shadow-xl shadow-black/20 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.15)]">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
@@ -557,7 +561,7 @@ export const BentoDashboard: React.FC = () => {
           className="group relative"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 to-purple-500/10 rounded-[2rem] blur-2xl group-hover:blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
-          <div className="relative bg-gradient-to-br from-slate-900/40 to-slate-950/60 backdrop-blur-2xl rounded-[2rem] border border-white/10 p-8 hover:border-white/20 transition-all shadow-xl shadow-black/20">
+          <div className="relative bg-gradient-to-br from-slate-900/40 to-slate-950/60 backdrop-blur-2xl rounded-[2rem] border border-white/10 p-8 hover:border-white/20 transition-all shadow-xl shadow-black/20 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.15)]">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
