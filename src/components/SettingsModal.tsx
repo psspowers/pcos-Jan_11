@@ -1,8 +1,9 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Download, Trash2, Award, TrendingUp } from 'lucide-react';
+import { X, Download, Trash2, Award, TrendingUp, RefreshCw } from 'lucide-react';
 import { useAchievements, usePlantState } from '../lib/hooks/useInsights';
 import { db } from '../lib/db';
 import { getPhaseDescription } from '../lib/logic/plant';
+import { resetDatabase } from '../lib/resetData';
 import { useState } from 'react';
 
 interface SettingsModalProps {
@@ -15,6 +16,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   const handleExportData = async () => {
     try {
@@ -69,6 +71,20 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
       alert('Failed to delete data. Please try again.');
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleResetDemoData = async () => {
+    try {
+      setIsResetting(true);
+      await resetDatabase();
+      alert('Demo data has been reset successfully with updated insights!');
+      window.location.reload();
+    } catch (error) {
+      console.error('Reset failed:', error);
+      alert('Failed to reset demo data. Please try again.');
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -233,6 +249,27 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                       className="px-4 py-2 bg-teal-400 hover:bg-teal-300 text-slate-950 font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                     >
                       {isExporting ? 'Exporting...' : 'Download Report'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="glass-card p-4 border-amber-500/20">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <h4 className="text-white font-medium mb-1 flex items-center gap-2">
+                        <RefreshCw className="w-4 h-4 text-amber-400" />
+                        Reset Demo Data
+                      </h4>
+                      <p className="text-sm text-slate-400">
+                        Clear current data and reload fresh demo data with 30 days of insights.
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleResetDemoData}
+                      disabled={isResetting}
+                      className="px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-medium rounded-lg transition-all border border-amber-500/30 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isResetting ? 'Resetting...' : 'Reset Data'}
                     </button>
                   </div>
                 </div>

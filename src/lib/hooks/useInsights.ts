@@ -282,8 +282,9 @@ async function calculateInsights(category: InsightCategory, days: number): Promi
       return energyVal !== undefined ? 10 - energyVal : 5;
     }
     if (metric === 'cycleRegularity') {
-      const isRegular = log.phase?.regular !== false;
-      return isRegular ? 10 : 5;
+      const phase = log.cyclePhase;
+      const isRegular = phase && phase !== 'unknown';
+      return isRegular ? 8 : 4;
     }
     if (['sleep', 'exercise', 'diet'].includes(metric)) {
       const val = log.lifestyle[metric as keyof typeof log.lifestyle];

@@ -29,7 +29,9 @@ function generateRecoveryDay(daysAgo: number): LogEntry {
       exercise: 'moderate',
       diet: 'balanced'
     },
-    customTags: []
+    customValues: {
+      energy: randomInRange(7, 9)
+    }
   };
 }
 
@@ -58,7 +60,9 @@ function generateCrashDay(daysAgo: number): LogEntry {
       exercise: 'rest',
       diet: 'cravings'
     },
-    customTags: []
+    customValues: {
+      energy: randomInRange(2, 4)
+    }
   };
 }
 
@@ -95,7 +99,9 @@ function generateBaselineDay(daysAgo: number): LogEntry {
       exercise: exerciseOptions[Math.floor(Math.random() * exerciseOptions.length)],
       diet: dietOptions[Math.floor(Math.random() * dietOptions.length)]
     },
-    customTags: []
+    customValues: {
+      energy: randomInRange(4, 7)
+    }
   };
 }
 
