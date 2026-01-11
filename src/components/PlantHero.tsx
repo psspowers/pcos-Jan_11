@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
 
 interface PlantHeroProps {
   health: number;
@@ -8,141 +7,104 @@ interface PlantHeroProps {
 }
 
 export const PlantHero: React.FC<PlantHeroProps> = ({ health, streak, name }) => {
-  const [glowIntensity, setGlowIntensity] = useState(0.6);
+  const getColorScheme = () => {
+    if (health >= 80) return { primary: '#14b8a6', secondary: '#5eead4', glow: 'rgba(45, 212, 191, 0.4)' };
+    if (health >= 50) return { primary: '#f59e0b', secondary: '#fbbf24', glow: 'rgba(251, 191, 36, 0.4)' };
+    return { primary: '#ef4444', secondary: '#f87171', glow: 'rgba(239, 68, 68, 0.4)' };
+  };
 
-  useEffect(() => {
-    setGlowIntensity(Math.max(0.3, health / 150));
-  }, [health]);
-
-  const baseColor = health >= 80 ? '#10b981' : health >= 50 ? '#f59e0b' : '#ef4444';
-  const accentColor = health >= 80 ? '#34d399' : health >= 50 ? '#fbbf24' : '#f87171';
+  const colors = getColorScheme();
 
   return (
-    <div className="relative w-full h-80 flex flex-col items-center justify-center overflow-hidden rounded-3xl bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800/50">
+    <div className="relative w-full h-96 flex flex-col items-center justify-center overflow-hidden rounded-[2rem] bg-gradient-to-b from-slate-900/50 to-slate-950/80 backdrop-blur-2xl border border-white/5">
       <motion.div
-        className="absolute inset-0 opacity-20"
+        className="absolute inset-0"
+        style={{
+          background: `radial-gradient(circle at 50% 40%, ${colors.primary}15, transparent 70%)`
+        }}
         animate={{
-          background: [
-            `radial-gradient(circle at 50% 50%, ${baseColor}22, transparent 70%)`,
-            `radial-gradient(circle at 50% 50%, ${accentColor}22, transparent 70%)`,
-            `radial-gradient(circle at 50% 50%, ${baseColor}22, transparent 70%)`
-          ]
+          opacity: [0.3, 0.6, 0.3]
         }}
         transition={{
-          duration: 4,
+          duration: 5,
           repeat: Infinity,
           ease: "easeInOut"
         }}
       />
 
-      <div className="relative z-10 flex flex-col items-center gap-6">
-        <motion.div
-          className="relative w-48 h-48"
-          animate={{
-            scale: [1, 1.05, 1],
-          }}
-          transition={{
-            duration: 3,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        >
-          <svg viewBox="0 0 200 200" className="w-full h-full">
-            <defs>
-              <linearGradient id="petalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor={baseColor} stopOpacity="0.8" />
-                <stop offset="100%" stopColor={accentColor} stopOpacity="0.9" />
-              </linearGradient>
-              <filter id="glow">
-                <feGaussianBlur stdDeviation={4 * glowIntensity} result="coloredBlur" />
-                <feMerge>
-                  <feMergeNode in="coloredBlur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
-
-            {[0, 60, 120, 180, 240, 300].map((rotation, index) => (
-              <motion.g
-                key={rotation}
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{
-                  opacity: streak >= (index + 1) * 3 ? 1 : 0.2,
-                  scale: streak >= (index + 1) * 3 ? 1 : 0.5,
-                  rotate: [rotation, rotation + 5, rotation]
-                }}
-                transition={{
-                  opacity: { duration: 0.5 },
-                  scale: { duration: 0.5 },
-                  rotate: {
-                    duration: 3 + index * 0.2,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }
-                }}
-                style={{ transformOrigin: '100px 100px' }}
-              >
-                <path
-                  d="M 100 100 Q 120 80 140 70 Q 150 65 155 75 Q 150 85 140 90 Q 120 100 100 100 Z"
-                  fill="url(#petalGradient)"
-                  filter="url(#glow)"
-                  opacity="0.9"
-                />
-              </motion.g>
-            ))}
-
-            <motion.circle
-              cx="100"
-              cy="100"
-              r="20"
-              fill={baseColor}
-              filter="url(#glow)"
-              animate={{
-                scale: [1, 1.1, 1],
-                opacity: [0.8, 1, 0.8]
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            />
-
-            <motion.circle
-              cx="100"
-              cy="100"
-              r="10"
-              fill={accentColor}
-              animate={{
-                scale: [1, 1.2, 1],
-              }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            />
-          </svg>
+      <div className="relative z-10 flex flex-col items-center gap-8">
+        <div className="relative flex items-center justify-center w-64 h-64">
+          <motion.div
+            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute w-32 h-32 rounded-full blur-[50px] opacity-40"
+            style={{ backgroundColor: colors.primary }}
+          />
 
           <motion.div
-            className="absolute inset-0 rounded-full"
-            style={{
-              background: `radial-gradient(circle, ${baseColor}40, transparent 70%)`,
-              filter: 'blur(30px)',
-            }}
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.3, 0.6, 0.3]
-            }}
+            animate={{ rotate: 360, scale: [1, 1.05, 1] }}
             transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: "easeInOut"
+              rotate: { duration: 20, repeat: Infinity, ease: "linear" },
+              scale: { duration: 5, repeat: Infinity }
+            }}
+            className="absolute w-40 h-40 border-2 blur-[1px]"
+            style={{
+              borderColor: `${colors.secondary}30`,
+              borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%"
             }}
           />
-        </motion.div>
 
-        <div className="text-center space-y-2">
+          <motion.div
+            animate={{ rotate: -360 }}
+            transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+            className="absolute w-48 h-48 border border-white/10 rounded-full border-dashed"
+          />
+
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+            className="absolute w-56 h-56 border border-white/5 rounded-full"
+          />
+
+          <motion.div
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="relative w-24 h-24 rounded-full"
+            style={{
+              background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
+              boxShadow: `0 0 30px ${colors.glow}, 0 0 60px ${colors.glow}40`
+            }}
+          />
+
+          {streak > 0 && (
+            <>
+              {[...Array(Math.min(streak, 6))].map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{
+                    opacity: [0.4, 0.7, 0.4],
+                    scale: 1,
+                    rotate: 360
+                  }}
+                  transition={{
+                    opacity: { duration: 3, repeat: Infinity, delay: i * 0.5 },
+                    rotate: { duration: 20 + i * 2, repeat: Infinity, ease: "linear" }
+                  }}
+                  className="absolute w-3 h-3 rounded-full"
+                  style={{
+                    backgroundColor: colors.secondary,
+                    left: `${50 + 35 * Math.cos((i * Math.PI * 2) / 6)}%`,
+                    top: `${50 + 35 * Math.sin((i * Math.PI * 2) / 6)}%`,
+                    boxShadow: `0 0 10px ${colors.glow}`
+                  }}
+                />
+              ))}
+            </>
+          )}
+        </div>
+
+        <div className="text-center space-y-3">
           <motion.h2
             className="text-2xl font-light text-white/90 tracking-wide"
             initial={{ opacity: 0, y: 10 }}
@@ -158,27 +120,35 @@ export const PlantHero: React.FC<PlantHeroProps> = ({ health, streak, name }) =>
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
           >
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10">
-              <span className="text-sm text-white/60 font-light">Streak</span>
-              <span className="text-lg font-semibold text-white/90">{streak}</span>
-              <span className="text-sm">🔥</span>
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all" />
+              <div className="relative flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 shadow-lg">
+                <span className="text-sm text-white/60 font-light">Streak</span>
+                <span className="text-xl font-semibold text-white/95">{streak}</span>
+                <span className="text-base">🔥</span>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10">
-              <span className="text-sm text-white/60 font-light">Health</span>
-              <span className="text-lg font-semibold text-white/90">{health}%</span>
+            <div className="relative group">
+              <div className="absolute inset-0 rounded-2xl blur-xl group-hover:blur-2xl transition-all"
+                style={{ background: `linear-gradient(135deg, ${colors.primary}30, ${colors.secondary}30)` }}
+              />
+              <div className="relative flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 shadow-lg">
+                <span className="text-sm text-white/60 font-light">Vitality</span>
+                <span className="text-xl font-semibold text-white/95">{health}%</span>
+              </div>
             </div>
           </motion.div>
         </div>
       </div>
 
       <motion.div
-        className="absolute bottom-4 left-1/2 -translate-x-1/2"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2"
         animate={{ y: [0, -5, 0] }}
         transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
       >
-        <div className="text-xs text-white/40 font-light tracking-widest uppercase">
-          {streak === 0 ? 'Begin Your Journey' : 'Keep Growing'}
+        <div className="text-xs text-white/30 font-light tracking-[0.2em] uppercase">
+          {streak === 0 ? 'Begin Your Journey' : 'Thriving'}
         </div>
       </motion.div>
     </div>
