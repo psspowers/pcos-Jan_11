@@ -20,7 +20,7 @@ export const BioOrb: React.FC<BioOrbProps> = ({ health, streak, mode }) => {
       <div className="relative w-64 h-64 flex items-center justify-center">
         <motion.div
           animate={{ scale: [1, 1.3, 1.1, 1], opacity: [0.3, 0.5, 0.2, 0.3] }}
-          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
           className={`absolute w-full h-full rounded-full blur-3xl ${theme.core} opacity-30`}
         />
 
@@ -37,9 +37,9 @@ export const BioOrb: React.FC<BioOrbProps> = ({ health, streak, mode }) => {
             ]
           }}
           transition={{
-            rotate: { duration: 20, repeat: Infinity, ease: "linear" },
-            scale: { duration: 7.3, repeat: Infinity, ease: "easeInOut" },
-            borderRadius: { duration: 11, repeat: Infinity, ease: "easeInOut" }
+            rotate: { duration: 40, repeat: Infinity, ease: "linear" },
+            scale: { duration: 15, repeat: Infinity, ease: "easeInOut" },
+            borderRadius: { duration: 22, repeat: Infinity, ease: "easeInOut" }
           }}
           className={`absolute w-52 h-52 border-2 border-white/20 backdrop-blur-sm`}
           style={{ boxShadow: "inset 0 0 30px rgba(255,255,255,0.15), 0 0 40px rgba(255,255,255,0.1)" }}
@@ -59,10 +59,10 @@ export const BioOrb: React.FC<BioOrbProps> = ({ health, streak, mode }) => {
             y: [0, -3, 2, -1, 0]
           }}
           transition={{
-            scale: { duration: 5.7, repeat: Infinity, ease: "easeInOut" },
-            borderRadius: { duration: 8.2, repeat: Infinity, ease: "easeInOut" },
-            x: { duration: 6.5, repeat: Infinity, ease: "easeInOut" },
-            y: { duration: 5.3, repeat: Infinity, ease: "easeInOut" }
+            scale: { duration: 12, repeat: Infinity, ease: "easeInOut" },
+            borderRadius: { duration: 17, repeat: Infinity, ease: "easeInOut" },
+            x: { duration: 13, repeat: Infinity, ease: "easeInOut" },
+            y: { duration: 11, repeat: Infinity, ease: "easeInOut" }
           }}
           className={`relative w-32 h-32 bg-gradient-to-tr ${theme.gradient} flex items-center justify-center shadow-[0_0_50px_rgba(0,0,0,0.3)]`}
         >
@@ -85,9 +85,9 @@ export const BioOrb: React.FC<BioOrbProps> = ({ health, streak, mode }) => {
             ]
           }}
           transition={{
-            rotate: { duration: 17, repeat: Infinity, ease: "linear" },
-            scale: { duration: 6.7, repeat: Infinity, ease: "easeInOut" },
-            borderRadius: { duration: 9.5, repeat: Infinity, ease: "easeInOut" }
+            rotate: { duration: 35, repeat: Infinity, ease: "linear" },
+            scale: { duration: 14, repeat: Infinity, ease: "easeInOut" },
+            borderRadius: { duration: 19, repeat: Infinity, ease: "easeInOut" }
           }}
           className={`absolute w-40 h-40 border border-white/10`}
           style={{ filter: "blur(1px)" }}
