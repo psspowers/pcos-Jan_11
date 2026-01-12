@@ -1,44 +1,30 @@
 
+import { Toaster } from "@/ui/toaster";
+import { Toaster as Sonner } from "@/ui/sonner";
+import { TooltipProvider } from "@/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Dashboard } from "./components/Dashboard";
-import { useEffect, useState } from "react";
-import { seedDatabase } from "./lib/seed";
+import { ThemeProvider } from "@/ui/theme-provider";
+import { BentoDashboard } from "@/screens/BentoDashboard";
+import NotFound from "@/screens/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => {
-  const [seeded, setSeeded] = useState(false);
-
-  useEffect(() => {
-    const initializeApp = async () => {
-      await seedDatabase();
-      setSeeded(true);
-    };
-
-    initializeApp();
-  }, []);
-
-  if (!seeded) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-teal-400 text-xl font-medium mb-2">Blossom</div>
-          <div className="text-slate-400 text-sm animate-pulse">Initializing...</div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
+const App = () => (
+  <ThemeProvider defaultTheme="dark" storageKey="blossom-theme">
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-        </Routes>
-      </BrowserRouter>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner position="top-center" />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<BentoDashboard />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
     </QueryClientProvider>
-  );
-};
+  </ThemeProvider>
+);
 
 export default App;

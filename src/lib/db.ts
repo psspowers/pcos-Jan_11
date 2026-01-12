@@ -1,89 +1,197 @@
 import Dexie, { Table } from 'dexie';
 
-export interface LogEntry {
-  id?: number;
+export interface DailyLog {
   date: string;
-  cyclePhase: 'follicular' | 'ovulatory' | 'luteal' | 'menstrual' | 'unknown';
-  flow?: 'none' | 'spotting' | 'light' | 'medium' | 'heavy';
-  symptoms: {
-    acne?: number;
-    hirsutism?: number;
-    hairLoss?: number;
-    bloat?: number;
-    cramps?: number;
+  cycleFlow: 'none' | 'spotting' | 'light' | 'moderate' | 'heavy';
+
+  hyperandrogenism: {
+    hirsutism: number;
+    acne: number;
+    hairLoss: number;
   };
-  psych: {
-    stress?: string;
-    bodyImage?: string;
-    mood?: number;
-    anxiety?: string;
+
+  metabolic: {
+    weight?: number;
+    bloating: number;
+    cravings: number;
+    eatingPattern: 'balanced' | 'binge' | 'restrict' | 'not-tracked';
   };
-  lifestyle: {
-    sleep?: string;
-    waterIntake?: number;
-    exercise?: string;
-    diet?: string;
+
+  psychological: {
+    anxiety: number;
+    depression: number;
+    bodyImage: number;
+    stress: number;
+    sleepQuality: number;
   };
-  customValues?: Record<string, number>;
+
+  customMetrics?: Array<{
+    name: string;
+    value: number;
+  }>;
 }
 
-export interface CustomSymptom {
+export interface PlantState {
+  id: string;
   name: string;
-  category: 'symptom' | 'psych' | 'lifestyle';
+  currentStreak: number;
+  totalLogs: number;
+  lastLogDate: string | null;
+  unlockedFeatures: string[];
+  health: number;
 }
 
-export interface Settings {
-  id?: number;
-  theme: 'dark' | 'light' | 'auto';
-  notifications: boolean;
-  customSymptomDefinitions: CustomSymptom[];
+export interface UserProfile {
+  id: string;
+  age?: number;
+  diagnosisYear?: number;
+  primaryGoal: 'hormonal' | 'metabolic' | 'mental' | 'fertility';
+  onboardingComplete: boolean;
+  reminderEnabled: boolean;
+  reminderTime?: string;
 }
 
 export class BlossomDB extends Dexie {
-  logs!: Table<LogEntry>;
-  settings!: Table<Settings>;
+  dailyLogs!: Table<DailyLog, string>;
+  plantState!: Table<PlantState, string>;
+  userProfile!: Table<UserProfile, string>;
 
   constructor() {
-    super('BlossomDB');
+    super('BlossomMonashDB');
+
     this.version(1).stores({
-      logs: '++id, date',
-      settings: '++id'
+      dailyLogs: 'date',
+      plantState: 'id',
+      userProfile: 'id'
     });
   }
 }
 
 export const db = new BlossomDB();
 
-export async function getOrCreateSettings(): Promise<Settings> {
-  const existing = await db.settings.toArray();
-  if (existing.length > 0) {
-    return existing[0];
+export const getDefaultLog = (date: string): DailyLog => ({
+  date,
+  cycleFlow: 'none',
+  hyperandrogenism: {
+    hirsutism: 0,
+    acne: 0,
+    hairLoss: 0
+  },
+  metabolic: {
+    bloating: 0,
+    cravings: 0,
+    eatingPattern: 'not-tracked'
+  },
+  psychological: {
+    anxiety: 0,
+    depression: 0,
+    bodyImage: 3,
+    stress: 0,
+    sleepQuality: 3
+  }
+});
+
+export const getDefaultPlantState = (): PlantState => ({
+  id: 'primary',
+  name: 'Your Companion',
+  currentStreak: 0,
+  totalLogs: 0,
+  lastLogDate: null,
+  unlockedFeatures: [],
+  health: 50
+});
+
+export const getDefaultProfile = (): UserProfile => ({
+  id: 'primary',
+  primaryGoal: 'hormonal',
+  onboardingComplete: false,
+  reminderEnabled: false
+});
+
+export const calculateStreak = async (): Promise<number> => {
+  const logs = await db.dailyLogs.orderBy('date').reverse().toArray();
+
+  if (logs.length === 0) return 0;
+
+  let streak = 0;
+  const today = new Date();
+
+  for (let i = 0; i < logs.length; i++) {
+    const expectedDate = new Date(today);
+    expectedDate.setDate(expectedDate.getDate() - i);
+    const expectedDateStr = expectedDate.toISOString().split('T')[0];
+
+    if (logs[i].date === expectedDateStr) {
+      streak++;
+    } else {
+      break;
+    }
   }
 
-  const defaultSettings: Settings = {
-    theme: 'dark',
-    notifications: true,
-    customSymptomDefinitions: []
-  };
+  return streak;
+};
 
-  const id = await db.settings.add(defaultSettings);
-  return { ...defaultSettings, id };
-}
+export const updatePlantState = async (): Promise<void> => {
+  const streak = await calculateStreak();
+  const totalLogs = await db.dailyLogs.count();
+  const logs = await db.dailyLogs.orderBy('date').reverse().limit(1).toArray();
+  const lastLogDate = logs.length > 0 ? logs[0].date : null;
 
-export async function getLogsInRange(startDate: string, endDate: string): Promise<LogEntry[]> {
-  return db.logs
-    .where('date')
-    .between(startDate, endDate, true, true)
-    .toArray();
-}
+  let health = 50;
+  if (streak >= 90) health = 100;
+  else if (streak >= 60) health = 95;
+  else if (streak >= 30) health = 85;
+  else if (streak >= 14) health = 75;
+  else if (streak >= 7) health = 65;
+  else if (streak >= 3) health = 55;
+  else if (streak > 0) health = 50 + (streak * 2);
 
-export async function getLastNDays(days: number): Promise<LogEntry[]> {
-  const endDate = new Date();
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - days);
+  const unlockedFeatures: string[] = [];
+  if (streak >= 1) unlockedFeatures.push('stem');
+  if (streak >= 3) unlockedFeatures.push('firstLeaf');
+  if (streak >= 7) unlockedFeatures.push('secondLeaf');
+  if (streak >= 14) unlockedFeatures.push('branches');
+  if (streak >= 30) unlockedFeatures.push('flower');
+  if (streak >= 60) unlockedFeatures.push('fruit');
 
-  return getLogsInRange(
-    startDate.toISOString().split('T')[0],
-    endDate.toISOString().split('T')[0]
-  );
-}
+  await db.plantState.put({
+    id: 'primary',
+    name: (await db.plantState.get('primary'))?.name || 'Your Companion',
+    currentStreak: streak,
+    totalLogs,
+    lastLogDate,
+    unlockedFeatures,
+    health
+  });
+};
+
+export const exportAllData = async (): Promise<string> => {
+  const logs = await db.dailyLogs.toArray();
+  const plant = await db.plantState.get('primary');
+  const profile = await db.userProfile.get('primary');
+
+  return JSON.stringify({
+    exportDate: new Date().toISOString(),
+    profile,
+    plant,
+    logs
+  }, null, 2);
+};
+
+export const deleteAllData = async (): Promise<void> => {
+  await db.dailyLogs.clear();
+  await db.plantState.clear();
+  await db.userProfile.clear();
+};
+
+export const initializeApp = async (): Promise<void> => {
+  const profile = await db.userProfile.get('primary');
+  if (!profile) {
+    await db.userProfile.add(getDefaultProfile());
+  }
+
+  const plant = await db.plantState.get('primary');
+  if (!plant) {
+    await db.plantState.add(getDefaultPlantState());
+  }
+};
