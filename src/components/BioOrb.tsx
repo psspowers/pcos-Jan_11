@@ -8,95 +8,97 @@ interface BioOrbProps {
 }
 
 export const BioOrb: React.FC<BioOrbProps> = ({ health, streak, mode }) => {
-  const colors = {
-    nurture: { core: 'bg-purple-500', glow: 'shadow-purple-500/50', gradient: 'from-purple-400 to-pink-400' },
-    steady: { core: 'bg-teal-500', glow: 'shadow-teal-500/50', gradient: 'from-teal-400 to-emerald-400' },
-    thrive: { core: 'bg-amber-500', glow: 'shadow-amber-500/50', gradient: 'from-amber-400 to-orange-400' }
+  const themes = {
+    nurture: {
+      main: 'bg-purple-500',
+      light: 'bg-purple-400',
+      ring: 'border-purple-500/30',
+      dot: 'bg-purple-400'
+    },
+    steady: {
+      main: 'bg-teal-500',
+      light: 'bg-teal-400',
+      ring: 'border-teal-500/30',
+      dot: 'bg-teal-400'
+    },
+    thrive: {
+      main: 'bg-amber-500',
+      light: 'bg-amber-400',
+      ring: 'border-amber-500/30',
+      dot: 'bg-amber-400'
+    }
   };
-  const theme = colors[mode];
+
+  const theme = themes[mode] || themes.steady;
 
   return (
-    <div className="relative flex flex-col items-center justify-center py-10">
+    <div className="flex flex-col items-center justify-center py-12">
       <div className="relative w-64 h-64 flex items-center justify-center">
-        <motion.div
-          animate={{ scale: [1, 1.3, 1.1, 1], opacity: [0.3, 0.5, 0.2, 0.3] }}
-          transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-          className={`absolute w-full h-full rounded-full blur-3xl ${theme.core} opacity-30`}
-        />
 
+        {/* 1. The Orbiting Dots Ring */}
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute w-full h-full rounded-full border border-white/5 flex items-center justify-center"
+        >
+          {/* 6 Orbiting Nodes positioned radially */}
+          {[0, 60, 120, 180, 240, 300].map((deg, i) => (
+            <div
+              key={i}
+              className={`absolute w-3 h-3 rounded-full ${theme.dot} shadow-[0_0_10px_rgba(255,255,255,0.5)]`}
+              style={{
+                transform: `rotate(${deg}deg) translate(7.5rem)`
+              }}
+            />
+          ))}
+        </motion.div>
+
+        {/* 2. The Morphing Organic Membrane */}
         <motion.div
           animate={{
-            rotate: [0, 360],
-            scale: [1, 1.2, 0.9, 1.1, 1],
+            rotate: -180,
             borderRadius: [
               "60% 40% 30% 70% / 60% 30% 70% 40%",
               "30% 60% 70% 40% / 50% 60% 30% 60%",
-              "68% 32% 49% 51% / 48% 68% 32% 52%",
-              "41% 59% 38% 62% / 65% 35% 65% 35%",
               "60% 40% 30% 70% / 60% 30% 70% 40%"
             ]
           }}
-          transition={{
-            rotate: { duration: 40, repeat: Infinity, ease: "linear" },
-            scale: { duration: 15, repeat: Infinity, ease: "easeInOut" },
-            borderRadius: { duration: 22, repeat: Infinity, ease: "easeInOut" }
-          }}
-          className={`absolute w-52 h-52 border-2 border-white/20 backdrop-blur-sm`}
-          style={{ boxShadow: "inset 0 0 30px rgba(255,255,255,0.15), 0 0 40px rgba(255,255,255,0.1)" }}
+          transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+          className={`absolute w-48 h-48 border-2 ${theme.ring} blur-[1px]`}
         />
 
+        {/* 3. The Solid Core Nucleus */}
         <motion.div
-          animate={{
-            scale: [1, 1.05, 0.95, 1.08, 1],
-            borderRadius: [
-              "63% 37% 54% 46% / 55% 48% 52% 45%",
-              "38% 62% 43% 57% / 48% 62% 38% 52%",
-              "70% 30% 46% 54% / 30% 54% 70% 46%",
-              "49% 51% 60% 40% / 63% 37% 63% 37%",
-              "63% 37% 54% 46% / 55% 48% 52% 45%"
-            ],
-            x: [0, 3, -2, 4, 0],
-            y: [0, -3, 2, -1, 0]
-          }}
-          transition={{
-            scale: { duration: 12, repeat: Infinity, ease: "easeInOut" },
-            borderRadius: { duration: 17, repeat: Infinity, ease: "easeInOut" },
-            x: { duration: 13, repeat: Infinity, ease: "easeInOut" },
-            y: { duration: 11, repeat: Infinity, ease: "easeInOut" }
-          }}
-          className={`relative w-32 h-32 bg-gradient-to-tr ${theme.gradient} flex items-center justify-center shadow-[0_0_50px_rgba(0,0,0,0.3)]`}
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          className={`relative w-32 h-32 rounded-full ${theme.main} shadow-[0_0_40px_rgba(45,212,191,0.3)] flex items-center justify-center`}
         >
-          <div className="text-center text-white">
-            <span className="block text-4xl font-bold tracking-tighter">{health}</span>
-            <span className="text-[10px] uppercase tracking-widest opacity-80">Vitality</span>
-          </div>
+           {/* Pure visual core, looks like a biological nucleus */}
         </motion.div>
 
-        <motion.div
-          animate={{
-            rotate: 360,
-            scale: [1, 1.18, 0.88, 1.05, 1],
-            borderRadius: [
-              "55% 45% 65% 35% / 60% 40% 60% 40%",
-              "35% 65% 40% 60% / 45% 55% 35% 65%",
-              "65% 35% 55% 45% / 35% 65% 45% 55%",
-              "45% 55% 60% 40% / 55% 45% 55% 45%",
-              "55% 45% 65% 35% / 60% 40% 60% 40%"
-            ]
-          }}
-          transition={{
-            rotate: { duration: 35, repeat: Infinity, ease: "linear" },
-            scale: { duration: 14, repeat: Infinity, ease: "easeInOut" },
-            borderRadius: { duration: 19, repeat: Infinity, ease: "easeInOut" }
-          }}
-          className={`absolute w-40 h-40 border border-white/10`}
-          style={{ filter: "blur(1px)" }}
-        />
       </div>
 
-      <p className="mt-4 text-slate-400 text-sm font-medium tracking-wide">
-        {streak} day streak
-      </p>
+      {/* 4. Text & Stats Below */}
+      <div className="mt-4 text-center space-y-4">
+        <h2 className="text-3xl font-light text-white tracking-wide opacity-90">
+          Your Companion
+        </h2>
+
+        <div className="flex items-center gap-4 justify-center">
+          {/* Streak Badge */}
+          <div className="px-6 py-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center gap-2 shadow-lg">
+            <span className="text-slate-400 text-sm font-medium">Streak</span>
+            <span className="text-white font-bold text-xl">{streak}</span>
+            <span className="text-xl">🔥</span>
+          </div>
+
+          {/* Vitality Badge */}
+          <div className="px-6 py-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center gap-2 shadow-lg">
+            <span className="text-slate-400 text-sm font-medium">Vitality</span>
+            <span className="text-white font-bold text-xl">{health}%</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
